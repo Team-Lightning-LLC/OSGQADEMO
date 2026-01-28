@@ -1650,11 +1650,11 @@
         // Parse and display results
         validationResults = parseValidationResults(content);
         
-        // Extract client info from validation doc name
+        // Use parsed values, fallback to doc name parts
         // Format: "US297012 - QA Validation - Tina Tanner - 1472267267"
         const nameParts = validationDoc.name?.split(' - ') || [];
-        const clientName = nameParts[2] || 'Unknown';
-        const loanNumber = nameParts[3] || 'Unknown';
+        const clientName = validationResults.clientName !== 'Unknown' ? validationResults.clientName : (nameParts[2] || 'Unknown');
+        const loanNumber = validationResults.loanNumber !== 'Unknown' ? validationResults.loanNumber : (nameParts[3] || 'Unknown');
         
         document.getElementById('afterSampleName').textContent = `${clientName} - ${loanNumber}`;
         document.getElementById('afterSampleMeta').textContent = 
@@ -1688,56 +1688,80 @@
       const lines = text.split('\n');
       
       for (const line of lines) {
-        // Extract state - handle **State:** or State: formats
-        if (line.match(/\*?\*?State\*?\*?:/i)) {
+        // Handle Field | Value table format
+        if (line.includes('|') && !line.includes('---')) {
+          const cells = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c);
+          
+          // Check for Field | Value pairs
+          if (cells.length === 2) {
+            const field = cells[0].toLowerCase();
+            const value = cells[1];
+            
+            if (field === 'state') results.state = value;
+            if (field === 'letter type' || field === 'type') results.type = value;
+            if (field === 'borrower' || field === 'client' || field === 'client name') results.clientName = value;
+            if (field === 'loan number' || field === 'loan/account') {
+              const numMatch = value.match(/(\d{5,})/);
+              if (numMatch) results.loanNumber = numMatch[1];
+            }
+          }
+        }
+        
+        // Also handle **State:** format (fallback)
+        if (line.match(/\*?\*?State\*?\*?:/i) && !line.includes('|')) {
           const match = line.match(/([A-Z]{2})\b/);
           if (match) results.state = match[1];
         }
         
-        // Extract type
-        if (line.match(/\*?\*?Type\*?\*?:/i)) {
+        if (line.match(/\*?\*?Type\*?\*?:/i) && !line.includes('|')) {
           const typeMatch = line.replace(/\*\*/g, '').split(':').slice(1).join(':').trim();
           if (typeMatch && typeMatch.length < 100) results.type = typeMatch;
         }
         
-        // Extract client name
-        if (line.match(/\*?\*?Client Name\*?\*?:/i)) {
+        if (line.match(/\*?\*?Client Name\*?\*?:/i) && !line.includes('|')) {
           results.clientName = line.replace(/\*\*/g, '').split(':').slice(1).join(':').trim();
         }
         
-        // Extract loan/account number
-        if (line.match(/\*?\*?(Loan\/Account|Loan Number)\*?\*?:/i)) {
+        if (line.match(/\*?\*?(Loan\/Account|Loan Number)\*?\*?:/i) && !line.includes('|')) {
           const numMatch = line.match(/(\d{5,})/);
           if (numMatch) results.loanNumber = numMatch[1];
         }
         
-        // Skip separator rows and header rows
+        // Skip separator rows and header rows for results table
         if (line.includes('|--') || line.includes('|-')) continue;
         if (line.match(/\|\s*ID\s*\|/i)) continue;
         
         // Parse result rows - table format: | ID | Assertion | Expected | Applies To | Result | Finding |
+        // Or simpler format: | ID | Assertion | Result | Finding |
         if (line.startsWith('|') && line.includes('|')) {
           const cells = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c);
           
-          // Need at least 5 columns and Result should be PASS/FAIL/GAP/N/A
-          if (cells.length >= 5) {
-            // Result is in column 5 (index 4) for 6-column table, or column 4 (index 3) for 5-column
-            const resultIndex = cells.length >= 6 ? 4 : 3;
-            const findingIndex = cells.length >= 6 ? 5 : 4;
-            const resultText = (cells[resultIndex] || '').toUpperCase();
+          if (cells.length >= 4) {
+            // Determine which column has the result
+            let resultIndex = -1;
+            let findingIndex = -1;
             
-            // Check if this looks like a real result row
-            if (resultText.includes('PASS') || resultText.includes('FAIL') || resultText.includes('GAP') || resultText.includes('N/A')) {
+            for (let i = 2; i < cells.length; i++) {
+              const cellUpper = cells[i].toUpperCase();
+              if (cellUpper.includes('PASS') || cellUpper.includes('FAIL') || cellUpper.includes('GAP') || cellUpper === 'NA' || cellUpper === 'N/A') {
+                resultIndex = i;
+                findingIndex = i + 1;
+                break;
+              }
+            }
+            
+            if (resultIndex > 0) {
+              const resultText = (cells[resultIndex] || '').toUpperCase();
               let resultValue = 'gap';
               if (resultText.includes('PASS')) resultValue = 'pass';
               else if (resultText.includes('FAIL')) resultValue = 'fail';
-              else if (resultText.includes('N/A')) resultValue = 'na';
+              else if (resultText === 'NA' || resultText === 'N/A') resultValue = 'na';
               
               results.items.push({
                 id: cells[0],
                 assertion: cells[1],
-                expected: cells[2] || '',
-                appliesTo: cells.length >= 6 ? cells[3] : '',
+                expected: resultIndex > 3 ? cells[2] : '',
+                appliesTo: resultIndex > 4 ? cells[3] : '',
                 result: resultValue,
                 finding: cells[findingIndex] || ''
               });
