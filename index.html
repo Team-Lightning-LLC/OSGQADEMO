@@ -1090,7 +1090,7 @@
     }
     
     async function runAgent(interactionName, data) {
-      // Start execution
+      // Start execution - fire and forget
       const execRes = await apiCall('/execute/async', {
         method: 'POST',
         body: JSON.stringify({
@@ -1101,56 +1101,13 @@
             environment: ENVIRONMENT_ID,
             model: MODEL
           },
-          interactive: false,
+          interactive: true,
           max_iterations: 100
         })
       });
       
-      // Log the FULL response to understand structure
-      console.log('=== EXECUTE RESPONSE ===');
-      console.log('Full response:', JSON.stringify(execRes, null, 2));
-      console.log('Keys:', Object.keys(execRes || {}));
-      console.log('execRes.id:', execRes?.id);
-      console.log('execRes.run_id:', execRes?.run_id);
-      console.log('execRes.runId:', execRes?.runId);
-      console.log('========================');
-      
-      // Try different possible field names for run ID
-      const runId = execRes?.id || execRes?.run_id || execRes?.runId;
-      if (!runId) {
-        // If no run ID, maybe we need to poll differently
-        // For now, return what we have so we can debug
-        console.log('No run ID found, returning full response');
-        return execRes;
-      }
-      
-      // Poll /runs/{runId} for completion
-      let attempts = 0;
-      const maxAttempts = 120; // 4 minutes max (2s intervals)
-      
-      while (attempts < maxAttempts) {
-        await sleep(2000);
-        attempts++;
-        
-        try {
-          const runRes = await apiCall(`/runs/${runId}`);
-          console.log(`Poll ${attempts}: status=${runRes.status}`);
-          
-          if (runRes.status === 'completed') {
-            return runRes;
-          } else if (runRes.status === 'failed' || runRes.status === 'error') {
-            throw new Error(runRes.error || 'Agent execution failed');
-          }
-          // Otherwise continue polling (running, pending, etc.)
-        } catch (pollErr) {
-          // If it's a 404, the run might not be ready yet
-          if (!pollErr.message.includes('404')) {
-            console.warn('Poll error:', pollErr);
-          }
-        }
-      }
-      
-      throw new Error('Agent timed out after 4 minutes');
+      console.log('Agent started:', execRes);
+      return execRes;
     }
     
     function sleep(ms) {
@@ -1171,53 +1128,67 @@
         // Upload file
         requirementsDocId = await uploadFile(file);
         
-        document.getElementById('processing1Text').textContent = 'Extracting checklist from requirements...';
+        document.getElementById('processing1Text').textContent = 'Starting checklist extraction...';
         
-        // Run Agent 1 and wait for completion
-        const runResult = await runAgent(AGENT_CHECKLIST_GENERATION, {
+        // Fire off Agent 1 (don't wait for it)
+        await runAgent(AGENT_CHECKLIST_GENERATION, {
           task: requirementsDocId
         });
         
-        console.log('Run completed:', runResult);
+        // Extract job code from filename (e.g., "US297012" from "Client requirment (US297012).docx")
+        const jobCodeMatch = file.name.match(/\(([^)]+)\)/);
+        const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
+        console.log('Job code extracted:', jobCode);
         
-        document.getElementById('processing1Text').textContent = 'Loading checklist...';
+        // Poll for checklist document to appear
+        let checklistDoc = null;
+        let attempts = 0;
+        const maxAttempts = 90; // 3 minutes max (2s intervals)
         
-        // The agent should have created a checklist document
-        // Try to find it from recent objects or parse from result
-        let checklistContent = null;
-        
-        // First check if result contains the checklist directly
-        if (runResult.result) {
-          checklistContent = typeof runResult.result === 'string' 
-            ? runResult.result 
-            : JSON.stringify(runResult.result);
-        }
-        
-        // If not, search for the checklist document
-        if (!checklistContent || checklistContent.length < 100) {
-          const docs = await apiCall('/objects?limit=20&offset=0');
-          const docList = Array.isArray(docs) ? docs : docs?.objects || [];
+        while (!checklistDoc && attempts < maxAttempts) {
+          await sleep(2000);
+          attempts++;
           
-          const fiveMinAgo = Date.now() - 5 * 60 * 1000;
-          const checklistDoc = docList.find(d => {
-            const createdAt = new Date(d.created_at).getTime();
-            const isRecent = createdAt > fiveMinAgo;
-            const isChecklist = d.name?.toLowerCase().includes('checklist');
-            return isRecent && isChecklist;
-          });
+          document.getElementById('processing1Text').textContent = `Waiting for checklist... (${attempts * 2}s)`;
           
-          if (checklistDoc) {
-            checklistDocId = checklistDoc.id;
-            checklistContent = await fetchDocumentContent(checklistDoc.content?.source);
+          try {
+            // Search for recent documents
+            const docs = await apiCall('/objects?limit=30&offset=0');
+            const docList = Array.isArray(docs) ? docs : docs?.objects || [];
+            
+            // Find a checklist document that matches our job code
+            const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+            checklistDoc = docList.find(d => {
+              const createdAt = new Date(d.created_at).getTime();
+              const isRecent = createdAt > fiveMinAgo;
+              const isChecklist = d.name?.toLowerCase().includes('checklist');
+              const matchesJob = jobCode ? d.name?.includes(jobCode) : true;
+              return isRecent && isChecklist && matchesJob;
+            });
+            
+            if (checklistDoc) {
+              console.log('Found checklist doc:', checklistDoc);
+            }
+            
+          } catch (pollErr) {
+            console.warn('Poll error:', pollErr);
           }
         }
         
-        if (!checklistContent) {
-          throw new Error('Could not retrieve checklist content');
+        if (!checklistDoc) {
+          throw new Error('Checklist not found after 3 minutes. Check Vertesia for status.');
         }
         
+        checklistDocId = checklistDoc.id;
+        
+        document.getElementById('processing1Text').textContent = 'Loading checklist content...';
+        
+        // Fetch the checklist content
+        const content = await fetchDocumentContent(checklistDoc.content?.source);
+        console.log('Checklist content:', content.substring(0, 500));
+        
         // Parse and display checklist
-        checklistData = parseChecklist(checklistContent);
+        checklistData = parseChecklist(content);
         
         renderChecklist(checklistData, 'checklistBody');
         document.getElementById('itemCount').textContent = checklistData.length;
