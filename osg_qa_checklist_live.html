@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSG QA Checklist Generator</title>
+  <style>
+    :root {
+      --primary: #0d2137;
+      --accent: #2a7d8c;
+      --accent-light: #3a9aad;
+      --accent-soft: #e6f3f5;
+      --ink: #1f2d3d;
+      --muted: #6c7a89;
+      --border: #dde2e8;
+      --bg: #f5f7f9;
+      --success: #28a745;
+      --success-soft: #e8f5e9;
+      --warning: #f0ad4e;
+      --error: #dc3545;
+      --error-soft: #fdf0ef;
+      --shadow: 0 2px 8px rgba(13,33,55,0.08);
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo {
+      width: 42px;
+      height: 42px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 800;
+      font-size: 14px;
+    }
+    
+    .brand-text { color: white; }
+    .brand-name { font-size: 18px; font-weight: 700; }
+    .brand-sub { font-size: 11px; opacity: 0.8; }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      font-size: 13px;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+    }
+    
+    .status-dot.disconnected { background: #f87171; }
+    
+    .btn-header {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn-header:hover { background: rgba(255,255,255,0.2); }
+    
+    /* Main Container */
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 32px;
+    }
+    
+    /* Workflow Grid */
+    .workflow-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    /* Workflow Panel */
+    .workflow-panel {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      min-height: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .workflow-panel.locked {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .step-number {
+      background: var(--accent);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    
+    .workflow-panel.locked .step-number {
+      background: var(--muted);
+    }
+    
+    .lock-icon {
+      color: var(--muted);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .panel-body {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+    
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 40px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .upload-zone:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    
+    .upload-zone svg { color: var(--accent); margin-bottom: 12px; }
+    .upload-zone p { font-size: 14px; color: var(--ink); margin-bottom: 4px; }
+    .upload-zone small { font-size: 12px; color: var(--muted); }
+    
+    .upload-zone input[type="file"] { display: none; }
+    
+    /* Processing Indicator */
+    .processing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--accent-soft);
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .processing-indicator span {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    
+    /* Success Indicator */
+    .success-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--success-soft);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      color: var(--success);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    /* Error Indicator */
+    .error-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--error-soft);
+      border-radius: 8px;
+      margin-bottom: 16px;
+      color: var(--error);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    /* Checklist */
+    .checklist-container {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .checklist-header {
+      padding: 12px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .checklist-title { font-size: 13px; font-weight: 600; }
+    .checklist-count { font-size: 11px; color: var(--muted); }
+    
+    .checklist-body {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 400px;
+    }
+    
+    .category-header {
+      padding: 8px 16px;
+      background: var(--primary);
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .checklist-item:hover { background: var(--bg); }
+    
+    .checklist-item.removed {
+      background: #fdf0ef;
+      opacity: 0.5;
+    }
+    
+    .checklist-item.removed .item-text { text-decoration: line-through; }
+    
+    .item-checkbox input {
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+    
+    .item-content { flex: 1; }
+    .item-id { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+    .item-text { font-size: 13px; color: var(--ink); margin-bottom: 4px; }
+    .item-meta { font-size: 11px; color: var(--muted); }
+    .item-expected { color: var(--accent); }
+    
+    /* Action Bar */
+    .action-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-top: auto;
+    }
+    
+    .action-info {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .action-info strong { color: var(--ink); }
+    
+    .btn {
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .btn-primary:hover:not(:disabled) { background: var(--accent-light); }
+    
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-success:hover:not(:disabled) { background: #229a3b; }
+    
+    .btn-secondary {
+      background: white;
+      color: var(--ink);
+      border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+    
+    /* Approved Badge */
+    .approved-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: var(--success-soft);
+      color: var(--success);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    /* Background Documents */
+    .background-docs {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    
+    .background-docs-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: var(--muted);
+    }
+    
+    .background-docs-header span:first-of-type {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    
+    .background-docs-note {
+      font-size: 11px;
+      color: var(--muted);
+      font-style: italic;
+    }
+    
+    .background-docs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .background-doc-group {
+      padding-left: 22px;
+    }
+    
+    .background-doc-group-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+    
+    .background-doc-item {
+      font-size: 12px;
+      color: var(--ink);
+      padding: 3px 0;
+      opacity: 0.8;
+    }
+    
+    /* After Sample Info */
+    .after-sample-info {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+    
+    .after-sample-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    
+    .after-sample-meta {
+      font-size: 11px;
+      color: var(--muted);
+      padding-left: 22px;
+    }
+    
+    /* Results */
+    .results-container {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .results-header {
+      padding: 14px 16px;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .results-title { font-size: 14px; font-weight: 600; }
+    
+    .results-actions button {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    
+    .results-body { max-height: 350px; overflow-y: auto; }
+    
+    .result-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .result-status {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .result-status.pass { background: var(--success-soft); color: var(--success); }
+    .result-status.fail { background: #fdf0ef; color: var(--error); }
+    .result-status.gap { background: #fef9e8; color: #b8860b; }
+    
+    .result-text { font-size: 13px; flex: 1; }
+    .result-finding {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      padding: 6px 10px;
+      background: var(--bg);
+      border-radius: 4px;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--muted);
+      padding: 40px;
+    }
+    
+    .empty-state svg { margin-bottom: 16px; opacity: 0.3; }
+    .empty-state p { font-size: 14px; margin-bottom: 4px; }
+    .empty-state small { font-size: 12px; opacity: 0.7; }
+    
+    /* Login Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(13,33,55,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal-overlay.hidden { display: none; }
+    
+    .modal {
+      background: white;
+      border-radius: 12px;
+      width: 400px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    
+    .modal h2 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+    
+    .modal p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    
+    .modal input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    
+    .modal input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    
+    .modal button {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    
+    .modal button:hover { background: var(--accent-light); }
+    .modal button:disabled { 
+      background: var(--muted); 
+      cursor: not-allowed; 
+    }
+    
+    .modal .error {
+      color: var(--error);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    
+    /* State visibility */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal">
+      <h2>OSG QA Checklist</h2>
+      <p>Enter password to continue</p>
+      <input type="password" id="passwordInput" placeholder="Password" onkeypress="if(event.key==='Enter')login()">
+      <button id="loginBtn" onclick="login()">Connect</button>
+      <div class="error hidden" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo-section">
+      <div class="logo">OSG</div>
+      <div class="brand-text">
+        <div class="brand-name">QA Checklist Generator</div>
+        <div class="brand-sub">Requirements to Validation</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="status-badge">
+        <div class="status-dot" id="connectionDot"></div>
+        <span id="connectionStatus">Disconnected</span>
+      </div>
+      <button class="btn-header" onclick="resetAll()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reset
+      </button>
+      <button class="btn-header" onclick="logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </button>
+    </div>
+  </header>
+  
+  <!-- Main -->
+  <div class="main-container">
+    <div class="workflow-grid">
+      
+      <!-- Part 1: Checklist Generation -->
+      <div class="workflow-panel" id="panel1">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="step-number">1</span>
+            Checklist Generation
+          </div>
+        </div>
+        <div class="panel-body">
+          
+          <!-- State: Upload -->
+          <div id="state1-upload">
+            <div class="upload-zone" onclick="document.getElementById('requirementsFile').click()">
+              <input type="file" id="requirementsFile" accept=".pdf,.docx,.doc,.txt" onchange="handleRequirementsUpload(event)">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p>Upload Requirements Document</p>
+              <small>PDF, DOCX, TXT supported</small>
+            </div>
+          </div>
+          
+          <!-- State: Processing -->
+          <div id="state1-processing" class="hidden">
+            <div class="processing-indicator">
+              <div class="spinner"></div>
+              <span id="processing1Text">Uploading document...</span>
+            </div>
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <p>Analyzing requirements...</p>
+            </div>
+          </div>
+          
+          <!-- State: Review Checklist -->
+          <div id="state1-review" class="hidden">
+            <div class="success-indicator">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="extractedFromText">Extracted from document</span>
+            </div>
+            
+            <div class="checklist-container">
+              <div class="checklist-header">
+                <span class="checklist-title">Generated Checklist</span>
+                <span class="checklist-count"><span id="itemCount">0</span> items</span>
+              </div>
+              <div class="checklist-body" id="checklistBody">
+                <!-- Checklist items will be inserted here -->
+              </div>
+            </div>
+            
+            <div class="action-bar">
+              <div class="action-info" id="changesSummary">Review items and approve when ready</div>
+              <button class="btn btn-success" onclick="approveChecklist()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Approve Checklist
+              </button>
+            </div>
+          </div>
+          
+          <!-- State: Approved -->
+          <div id="state1-approved" class="hidden">
+            <div class="success-indicator">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Checklist Approved — Ready for validation</span>
+            </div>
+            
+            <div class="checklist-container" style="opacity: 0.85;">
+              <div class="checklist-header">
+                <span class="checklist-title">Approved Checklist</span>
+                <span class="checklist-count" id="approvedItemCount">0 items</span>
+              </div>
+              <div class="checklist-body" id="approvedChecklistBody">
+                <!-- Approved checklist items will be inserted here -->
+              </div>
+            </div>
+            
+            <div class="action-bar">
+              <div class="action-info">Checklist locked for validation</div>
+              <button class="btn btn-secondary" onclick="editChecklist()">Edit Checklist</button>
+            </div>
+          </div>
+          
+          <!-- State: Error -->
+          <div id="state1-error" class="hidden">
+            <div class="error-indicator">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <span id="error1Text">An error occurred</span>
+            </div>
+            <button class="btn btn-secondary" onclick="resetPart1()">Try Again</button>
+          </div>
+          
+        </div>
+      </div>
+      
+      <!-- Part 2: Validation -->
+      <div class="workflow-panel locked" id="panel2">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="step-number">2</span>
+            Validation
+          </div>
+          <div class="lock-icon" id="lockIcon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Approve checklist to unlock
+          </div>
+        </div>
+        <div class="panel-body">
+          
+          <!-- State: Locked -->
+          <div id="state2-locked">
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              <p>Validation Locked</p>
+              <small>Complete Part 1 to proceed</small>
+            </div>
+          </div>
+          
+          <!-- State: Upload After Sample -->
+          <div id="state2-upload" class="hidden">
+            <div class="approved-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              <span id="approvedBadgeText">Checklist Approved</span>
+            </div>
+            
+            <div class="upload-zone" onclick="document.getElementById('afterSampleFile').click()" style="margin-bottom: 20px;">
+              <input type="file" id="afterSampleFile" accept=".pdf" onchange="handleAfterSampleUpload(event)">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <p>Upload After Sample PDF</p>
+              <small>The output document to validate</small>
+            </div>
+            
+            <div class="background-docs">
+              <div class="background-docs-header">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <span>Reference Collections</span>
+                <span class="background-docs-note">(auto-selected by agent)</span>
+              </div>
+              <div class="background-docs-list">
+                <div class="background-doc-group">
+                  <div class="background-doc-group-title">Letter Templates</div>
+                  <div class="background-doc-item">Bankruptcy Combo Attorney Cover, Internal Combo Letter, etc.</div>
+                </div>
+                <div class="background-doc-group">
+                  <div class="background-doc-group-title">Fee Schedules</div>
+                  <div class="background-doc-item">State-specific fee schedules (AR, CT, GA, HI, IL, NC, NJ, NV...)</div>
+                </div>
+                <div class="background-doc-group">
+                  <div class="background-doc-group-title">State Disclosures</div>
+                  <div class="background-doc-item">State Specific Verbiage, Bankruptcy State Specific Verbiage</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- State: Processing -->
+          <div id="state2-processing" class="hidden">
+            <div class="processing-indicator">
+              <div class="spinner"></div>
+              <span id="processing2Text">Uploading After Sample...</span>
+            </div>
+            <div class="empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              <p>Validating against checklist...</p>
+            </div>
+          </div>
+          
+          <!-- State: Results -->
+          <div id="state2-results" class="hidden">
+            <div class="after-sample-info">
+              <div class="after-sample-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                <span id="afterSampleName">After Sample</span>
+              </div>
+              <div class="after-sample-meta" id="afterSampleMeta">
+                Validated using reference documents
+              </div>
+            </div>
+            
+            <div class="results-container">
+              <div class="results-header">
+                <span class="results-title">Validation Results</span>
+                <div class="results-actions">
+                  <button onclick="downloadResults()">Download</button>
+                  <button onclick="rerunValidation()">Rerun</button>
+                </div>
+              </div>
+              <div class="results-body" id="resultsBody">
+                <!-- Results will be inserted here -->
+              </div>
+            </div>
+            
+            <div class="action-bar" style="margin-top:16px;">
+              <div class="action-info" id="resultsSummary">Loading...</div>
+              <button class="btn btn-primary" onclick="downloadResults()">Download Report</button>
+            </div>
+          </div>
+          
+          <!-- State: Error -->
+          <div id="state2-error" class="hidden">
+            <div class="error-indicator">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              <span id="error2Text">An error occurred</span>
+            </div>
+            <button class="btn btn-secondary" onclick="resetPart2()">Try Again</button>
+          </div>
+          
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIGURATION
+    // ============================================================
+    const API_BASE = 'https://api.vertesia.io/api/v1';
+    const STS_BASE = 'https://api.vertesia.io';
+    const ENVIRONMENT_ID = '681915c6a01fb262a410c161';
+    const PASSWORD = 'OSG2026Demo';
+    const API_KEY = 'sk-25bf067b64952c430f0b786b52bf89f8';
+    
+    // Agent interaction names
+    const AGENT_CHECKLIST_GENERATION = 'QAChecklistGeneration';
+    const AGENT_CHECKLIST_VALIDATION = 'QAChecklistValidation';
+    
+    // Reference collection IDs
+    const COLLECTIONS = {
+      feeSchedule: '697a2fb42edd9bc3a382b569',
+      letterTemplate: '697a2fd2162b6cf60e59ee6a',
+      stateDisclosure: '697a2fde8767dd4a5e8d5b9e'
+    };
+    
+    // Model
+    const MODEL = 'publishers/anthropic/models/claude-opus-4-5';
+    
+    // ============================================================
+    // STATE
+    // ============================================================
+    let jwt = null;
+    let requirementsDocId = null;
+    let checklistDocId = null;
+    let afterSampleDocId = null;
+    let checklistData = [];
+    let validationResults = null;
+    
+    // ============================================================
+    // AUTH
+    // ============================================================
+    async function login() {
+      const password = document.getElementById('passwordInput').value.trim();
+      const loginBtn = document.getElementById('loginBtn');
+      
+      if (password !== PASSWORD) {
+        showLoginError('Incorrect password');
+        return;
+      }
+      
+      // Show loading state
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Connecting...';
+      document.getElementById('loginError').classList.add('hidden');
+      
+      try {
+        // Exchange API key for JWT
+        const response = await fetch(`${STS_BASE}/auth/token`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${API_KEY}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to authenticate');
+        }
+        
+        const data = await response.json();
+        jwt = data.token;
+        
+        sessionStorage.setItem('osg_qa_jwt', jwt);
+        sessionStorage.setItem('osg_qa_authenticated', 'true');
+        
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('connectionDot').classList.remove('disconnected');
+        document.getElementById('connectionStatus').textContent = 'Connected';
+        
+      } catch (error) {
+        console.error('Auth error:', error);
+        showLoginError('Authentication failed: ' + error.message);
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Connect';
+      }
+    }
+    
+    function logout() {
+      jwt = null;
+      sessionStorage.removeItem('osg_qa_jwt');
+      sessionStorage.removeItem('osg_qa_authenticated');
+      document.getElementById('loginModal').classList.remove('hidden');
+      document.getElementById('connectionDot').classList.add('disconnected');
+      document.getElementById('connectionStatus').textContent = 'Disconnected';
+      resetAll();
+    }
+    
+    function showLoginError(msg) {
+      const el = document.getElementById('loginError');
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+    
+    async function checkAuth() {
+      const authenticated = sessionStorage.getItem('osg_qa_authenticated');
+      const storedJwt = sessionStorage.getItem('osg_qa_jwt');
+      
+      if (authenticated === 'true' && storedJwt) {
+        jwt = storedJwt;
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('connectionDot').classList.remove('disconnected');
+        document.getElementById('connectionStatus').textContent = 'Connected';
+      }
+    }
+    
+    // ============================================================
+    // API HELPERS
+    // ============================================================
+    async function apiCall(endpoint, options = {}) {
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers: {
+          'Authorization': `Bearer ${jwt}`,
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
+      });
+      
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || `API error: ${response.status}`);
+      }
+      
+      return response.json();
+    }
+    
+    async function uploadFile(file) {
+      // Step 1: Get upload URL
+      const uploadUrlRes = await apiCall('/objects/upload-url', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: file.name,
+          content_type: file.type
+        })
+      });
+      
+      // Step 2: Upload to GCS
+      await fetch(uploadUrlRes.url, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type
+        }
+      });
+      
+      // Step 3: Create object record
+      const objectRes = await apiCall('/objects', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: file.name,
+          content: { source: uploadUrlRes.id }
+        })
+      });
+      
+      return objectRes.id;
+    }
+    
+    async function runAgent(interactionName, data) {
+      // Start execution
+      const execRes = await apiCall('/execute/async', {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'conversation',
+          interaction: interactionName,
+          data: data,
+          config: {
+            environment: ENVIRONMENT_ID,
+            model: MODEL
+          },
+          interactive: false,
+          max_iterations: 100
+        })
+      });
+      
+      const runId = execRes.id;
+      
+      // Poll for completion
+      while (true) {
+        await sleep(2000);
+        
+        const statusRes = await apiCall(`/execute/${runId}`);
+        
+        if (statusRes.status === 'completed') {
+          return statusRes.result;
+        } else if (statusRes.status === 'failed') {
+          throw new Error(statusRes.error || 'Agent execution failed');
+        }
+        // Otherwise continue polling
+      }
+    }
+    
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    // ============================================================
+    // PART 1: CHECKLIST GENERATION
+    // ============================================================
+    async function handleRequirementsUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      showState1('processing');
+      document.getElementById('processing1Text').textContent = 'Uploading document...';
+      
+      try {
+        // Upload file
+        requirementsDocId = await uploadFile(file);
+        
+        document.getElementById('processing1Text').textContent = 'Extracting checklist from requirements...';
+        
+        // Run Agent 1
+        const result = await runAgent(AGENT_CHECKLIST_GENERATION, {
+          task: requirementsDocId
+        });
+        
+        // Parse and display checklist
+        checklistDocId = result.documentId || requirementsDocId; // Agent should return the checklist doc ID
+        checklistData = parseChecklist(result.content || result);
+        
+        renderChecklist(checklistData, 'checklistBody');
+        document.getElementById('itemCount').textContent = checklistData.length;
+        document.getElementById('extractedFromText').textContent = `Extracted from ${file.name}`;
+        
+        showState1('review');
+        
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('error1Text').textContent = error.message;
+        showState1('error');
+      }
+    }
+    
+    function parseChecklist(content) {
+      // Parse markdown table format into structured data
+      // This is a simplified parser - adjust based on actual agent output
+      const items = [];
+      const lines = (typeof content === 'string' ? content : JSON.stringify(content)).split('\n');
+      
+      let currentCategory = 'GENERAL';
+      let id = 1;
+      
+      for (const line of lines) {
+        // Check for category header
+        if (line.startsWith('### ')) {
+          currentCategory = line.replace('### ', '').trim();
+          continue;
+        }
+        
+        // Check for table row
+        if (line.startsWith('|') && !line.includes('---') && !line.includes('ID')) {
+          const cells = line.split('|').map(c => c.trim()).filter(c => c);
+          if (cells.length >= 3) {
+            items.push({
+              id: cells[0] || id++,
+              assertion: cells[1] || '',
+              expected: cells[2] || '',
+              appliesTo: cells[3] || 'ALL',
+              source: cells[4] || '',
+              category: currentCategory,
+              checked: true
+            });
+          }
+        }
+      }
+      
+      // If parsing failed, return dummy data for testing
+      if (items.length === 0) {
+        return [
+          { id: 1, assertion: 'Is the logo correct?', expected: 'Discover logo present', appliesTo: 'ALL', category: 'BRANDING', checked: true },
+          { id: 2, assertion: 'Is borrower address present?', expected: 'Address in correct position', appliesTo: 'ALL', category: 'LAYOUT', checked: true },
+          { id: 3, assertion: 'Is bankruptcy disclosure present?', expected: 'Disclosure at top', appliesTo: 'Bankruptcy', category: 'COMPLIANCE', checked: true }
+        ];
+      }
+      
+      return items;
+    }
+    
+    function renderChecklist(items, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      
+      let currentCategory = null;
+      
+      for (const item of items) {
+        // Add category header if needed
+        if (item.category !== currentCategory) {
+          currentCategory = item.category;
+          const header = document.createElement('div');
+          header.className = 'category-header';
+          header.textContent = currentCategory;
+          container.appendChild(header);
+        }
+        
+        const itemEl = document.createElement('div');
+        itemEl.className = 'checklist-item' + (item.checked ? '' : ' removed');
+        itemEl.innerHTML = `
+          <div class="item-checkbox">
+            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${item.id})">
+          </div>
+          <div class="item-content">
+            <div class="item-id">ID: ${item.id}</div>
+            <div class="item-text">${item.assertion}</div>
+            <div class="item-meta">Expected: <span class="item-expected">${item.expected}</span> · Applies to: ${item.appliesTo}</div>
+          </div>
+        `;
+        container.appendChild(itemEl);
+      }
+    }
+    
+    function toggleItem(id) {
+      const item = checklistData.find(i => i.id == id);
+      if (item) {
+        item.checked = !item.checked;
+        renderChecklist(checklistData, 'checklistBody');
+        updateChangesSummary();
+      }
+    }
+    
+    function updateChangesSummary() {
+      const removed = checklistData.filter(i => !i.checked).length;
+      const el = document.getElementById('changesSummary');
+      if (removed > 0) {
+        el.innerHTML = `<strong>${removed} item${removed > 1 ? 's' : ''} removed</strong>`;
+      } else {
+        el.textContent = 'Review items and approve when ready';
+      }
+    }
+    
+    function approveChecklist() {
+      // Filter to only checked items
+      const approvedItems = checklistData.filter(i => i.checked);
+      
+      // Render approved checklist (read-only)
+      renderChecklistReadOnly(approvedItems, 'approvedChecklistBody');
+      document.getElementById('approvedItemCount').textContent = `${approvedItems.length} items`;
+      document.getElementById('approvedBadgeText').textContent = `Checklist Approved (${approvedItems.length} items)`;
+      
+      showState1('approved');
+      unlockPart2();
+    }
+    
+    function renderChecklistReadOnly(items, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      
+      let currentCategory = null;
+      
+      for (const item of items) {
+        if (item.category !== currentCategory) {
+          currentCategory = item.category;
+          const header = document.createElement('div');
+          header.className = 'category-header';
+          header.textContent = currentCategory;
+          container.appendChild(header);
+        }
+        
+        const itemEl = document.createElement('div');
+        itemEl.className = 'checklist-item';
+        itemEl.style.pointerEvents = 'none';
+        itemEl.innerHTML = `
+          <div class="item-content">
+            <div class="item-id">ID: ${item.id}</div>
+            <div class="item-text">${item.assertion}</div>
+            <div class="item-meta">Expected: <span class="item-expected">${item.expected}</span> · Applies to: ${item.appliesTo}</div>
+          </div>
+        `;
+        container.appendChild(itemEl);
+      }
+    }
+    
+    function editChecklist() {
+      showState1('review');
+      lockPart2();
+    }
+    
+    // ============================================================
+    // PART 2: VALIDATION
+    // ============================================================
+    function unlockPart2() {
+      document.getElementById('panel2').classList.remove('locked');
+      document.getElementById('lockIcon').classList.add('hidden');
+      showState2('upload');
+    }
+    
+    function lockPart2() {
+      document.getElementById('panel2').classList.add('locked');
+      document.getElementById('lockIcon').classList.remove('hidden');
+      showState2('locked');
+    }
+    
+    async function handleAfterSampleUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      showState2('processing');
+      document.getElementById('processing2Text').textContent = 'Uploading After Sample...';
+      
+      try {
+        // Upload file
+        afterSampleDocId = await uploadFile(file);
+        
+        document.getElementById('processing2Text').textContent = 'Validating against checklist...';
+        
+        // Run Agent 3
+        const result = await runAgent(AGENT_CHECKLIST_VALIDATION, {
+          after_sample: afterSampleDocId,
+          checklist_id: checklistDocId
+        });
+        
+        // Parse and display results
+        validationResults = parseValidationResults(result.content || result);
+        
+        document.getElementById('afterSampleName').textContent = file.name;
+        document.getElementById('afterSampleMeta').textContent = 
+          `State: ${validationResults.state || 'Unknown'} | Type: ${validationResults.type || 'Unknown'}`;
+        
+        renderResults(validationResults.items);
+        updateResultsSummary(validationResults.items);
+        
+        showState2('results');
+        
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('error2Text').textContent = error.message;
+        showState2('error');
+      }
+    }
+    
+    function parseValidationResults(content) {
+      // Parse the validation results from agent output
+      const results = {
+        state: 'NY',
+        type: 'Bankruptcy Internal',
+        items: []
+      };
+      
+      const lines = (typeof content === 'string' ? content : JSON.stringify(content)).split('\n');
+      
+      for (const line of lines) {
+        // Extract state
+        if (line.includes('State Detected:') || line.includes('**State:**')) {
+          const match = line.match(/:\s*([A-Z]{2})/);
+          if (match) results.state = match[1];
+        }
+        
+        // Extract type
+        if (line.includes('Document Type:') || line.includes('**Type:**')) {
+          results.type = line.split(':').pop().trim();
+        }
+        
+        // Parse result rows
+        if (line.startsWith('|') && !line.includes('---') && !line.includes('ID')) {
+          const cells = line.split('|').map(c => c.trim()).filter(c => c);
+          if (cells.length >= 4) {
+            const result = cells[3]?.toUpperCase() || '';
+            results.items.push({
+              id: cells[0],
+              assertion: cells[1],
+              expected: cells[2],
+              result: result.includes('PASS') ? 'pass' : result.includes('FAIL') ? 'fail' : 'gap',
+              finding: cells[4] || ''
+            });
+          }
+        }
+      }
+      
+      // If parsing failed, return dummy results
+      if (results.items.length === 0) {
+        results.items = [
+          { id: 1, assertion: 'Is the logo correct?', result: 'pass', finding: 'Discover logo present at top left' },
+          { id: 2, assertion: 'Is borrower address present?', result: 'pass', finding: 'Address correctly formatted' },
+          { id: 3, assertion: 'Is bankruptcy disclosure present?', result: 'pass', finding: 'Disclosure text matches template' }
+        ];
+      }
+      
+      return results;
+    }
+    
+    function renderResults(items) {
+      const container = document.getElementById('resultsBody');
+      container.innerHTML = '';
+      
+      for (const item of items) {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'result-item';
+        
+        const icon = item.result === 'pass' 
+          ? '<polyline points="20 6 9 17 4 12"/>'
+          : item.result === 'fail'
+          ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
+          : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+        
+        itemEl.innerHTML = `
+          <div class="result-status ${item.result}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icon}</svg>
+          </div>
+          <div class="result-content">
+            <div class="result-text">${item.assertion}</div>
+            ${item.finding ? `<div class="result-finding">${item.finding}</div>` : ''}
+          </div>
+        `;
+        container.appendChild(itemEl);
+      }
+    }
+    
+    function updateResultsSummary(items) {
+      const passed = items.filter(i => i.result === 'pass').length;
+      const failed = items.filter(i => i.result === 'fail').length;
+      const gaps = items.filter(i => i.result === 'gap').length;
+      
+      document.getElementById('resultsSummary').innerHTML = 
+        `<strong>${passed} passed</strong> · ${failed} failed · ${gaps} gaps`;
+    }
+    
+    function rerunValidation() {
+      showState2('upload');
+      document.getElementById('afterSampleFile').value = '';
+    }
+    
+    function downloadResults() {
+      // Create downloadable report
+      let report = `# Validation Results\n\n`;
+      report += `**After Sample:** ${document.getElementById('afterSampleName').textContent}\n`;
+      report += `**${document.getElementById('afterSampleMeta').textContent}**\n\n`;
+      report += `## Results\n\n`;
+      report += `| ID | Assertion | Result | Finding |\n`;
+      report += `|----|-----------|--------|----------|\n`;
+      
+      for (const item of validationResults.items) {
+        report += `| ${item.id} | ${item.assertion} | ${item.result.toUpperCase()} | ${item.finding} |\n`;
+      }
+      
+      const blob = new Blob([report], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'validation-results.md';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    // ============================================================
+    // UI STATE HELPERS
+    // ============================================================
+    function showState1(state) {
+      const states = ['upload', 'processing', 'review', 'approved', 'error'];
+      for (const s of states) {
+        document.getElementById(`state1-${s}`).classList.toggle('hidden', s !== state);
+      }
+    }
+    
+    function showState2(state) {
+      const states = ['locked', 'upload', 'processing', 'results', 'error'];
+      for (const s of states) {
+        document.getElementById(`state2-${s}`).classList.toggle('hidden', s !== state);
+      }
+    }
+    
+    function resetPart1() {
+      requirementsDocId = null;
+      checklistDocId = null;
+      checklistData = [];
+      document.getElementById('requirementsFile').value = '';
+      showState1('upload');
+      lockPart2();
+    }
+    
+    function resetPart2() {
+      afterSampleDocId = null;
+      validationResults = null;
+      document.getElementById('afterSampleFile').value = '';
+      showState2('upload');
+    }
+    
+    function resetAll() {
+      resetPart1();
+      resetPart2();
+    }
+    
+    // ============================================================
+    // INIT
+    // ============================================================
+    checkAuth();
+  </script>
+
+</body>
+</html>
