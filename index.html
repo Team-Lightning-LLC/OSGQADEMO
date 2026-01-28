@@ -1106,11 +1106,22 @@
         })
       });
       
-      console.log('Agent started:', execRes);
+      // Log the FULL response to understand structure
+      console.log('=== EXECUTE RESPONSE ===');
+      console.log('Full response:', JSON.stringify(execRes, null, 2));
+      console.log('Keys:', Object.keys(execRes || {}));
+      console.log('execRes.id:', execRes?.id);
+      console.log('execRes.run_id:', execRes?.run_id);
+      console.log('execRes.runId:', execRes?.runId);
+      console.log('========================');
       
-      const runId = execRes.id;
+      // Try different possible field names for run ID
+      const runId = execRes?.id || execRes?.run_id || execRes?.runId;
       if (!runId) {
-        throw new Error('No run ID returned from execute');
+        // If no run ID, maybe we need to poll differently
+        // For now, return what we have so we can debug
+        console.log('No run ID found, returning full response');
+        return execRes;
       }
       
       // Poll /runs/{runId} for completion
