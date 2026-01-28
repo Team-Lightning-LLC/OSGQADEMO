@@ -629,6 +629,68 @@
     
     /* State visibility */
     .hidden { display: none !important; }
+    
+    /* Source Selector */
+    .source-selector {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .source-option {
+      flex: 1;
+      cursor: pointer;
+    }
+    
+    .source-option input { display: none; }
+    
+    .source-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 14px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    
+    .source-option input:checked + .source-label {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    
+    .source-label:hover {
+      border-color: var(--accent);
+    }
+    
+    /* Checklist Dropdown */
+    .input-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    
+    .checklist-dropdown {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--ink);
+      background: white;
+      cursor: pointer;
+    }
+    
+    .checklist-dropdown:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -685,15 +747,47 @@
           
           <!-- State: Upload -->
           <div id="state1-upload">
-            <div class="upload-zone" onclick="document.getElementById('requirementsFile').click()">
-              <input type="file" id="requirementsFile" accept=".pdf,.docx,.doc,.txt" onchange="handleRequirementsUpload(event)">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              <p>Upload Requirements Document</p>
-              <small>PDF, DOCX, TXT supported</small>
+            <div class="source-selector">
+              <label class="source-option">
+                <input type="radio" name="checklistSource" value="existing" onchange="toggleChecklistSource('existing')">
+                <span class="source-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  Use Existing Checklist
+                </span>
+              </label>
+              <label class="source-option">
+                <input type="radio" name="checklistSource" value="new" checked onchange="toggleChecklistSource('new')">
+                <span class="source-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Upload New Requirements
+                </span>
+              </label>
+            </div>
+            
+            <!-- Existing Checklist Dropdown -->
+            <div id="existingChecklistSection" class="hidden" style="margin-top: 16px;">
+              <label class="input-label">Select Checklist</label>
+              <select id="checklistDropdown" class="checklist-dropdown" onchange="handleChecklistSelect()">
+                <option value="">-- Select a checklist --</option>
+              </select>
+              <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" onclick="loadSelectedChecklist()" id="loadChecklistBtn" disabled>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Load Checklist
+              </button>
+            </div>
+            
+            <!-- Upload New -->
+            <div id="newUploadSection" style="margin-top: 16px;">
+              <div class="upload-zone" onclick="document.getElementById('requirementsFile').click()">
+                <input type="file" id="requirementsFile" accept=".pdf,.docx,.doc,.txt" onchange="handleRequirementsUpload(event)">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="17 8 12 3 7 8"/>
+                  <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p>Upload Requirements Document</p>
+                <small>PDF, DOCX, TXT supported</small>
+              </div>
             </div>
           </div>
           
@@ -1117,6 +1211,103 @@
     // ============================================================
     // PART 1: CHECKLIST GENERATION
     // ============================================================
+    
+    // Toggle between existing checklist and new upload
+    function toggleChecklistSource(source) {
+      const existingSection = document.getElementById('existingChecklistSection');
+      const newSection = document.getElementById('newUploadSection');
+      
+      if (source === 'existing') {
+        existingSection.classList.remove('hidden');
+        newSection.classList.add('hidden');
+        loadExistingChecklists();
+      } else {
+        existingSection.classList.add('hidden');
+        newSection.classList.remove('hidden');
+      }
+    }
+    
+    // Load existing checklists from Vertesia
+    async function loadExistingChecklists() {
+      const dropdown = document.getElementById('checklistDropdown');
+      dropdown.innerHTML = '<option value="">Loading...</option>';
+      
+      try {
+        const docs = await apiCall('/objects?limit=100&offset=0');
+        const docList = Array.isArray(docs) ? docs : docs?.objects || [];
+        
+        // Filter for checklist documents
+        const checklists = docList.filter(d => 
+          d.name?.toLowerCase().includes('checklist') && 
+          !d.name?.toLowerCase().includes('validation')
+        );
+        
+        dropdown.innerHTML = '<option value="">-- Select a checklist --</option>';
+        
+        checklists.forEach(doc => {
+          const option = document.createElement('option');
+          option.value = doc.id;
+          option.textContent = doc.name;
+          option.dataset.source = doc.content?.source || '';
+          dropdown.appendChild(option);
+        });
+        
+        if (checklists.length === 0) {
+          dropdown.innerHTML = '<option value="">No checklists found</option>';
+        }
+        
+      } catch (error) {
+        console.error('Failed to load checklists:', error);
+        dropdown.innerHTML = '<option value="">Error loading checklists</option>';
+      }
+    }
+    
+    // Handle dropdown selection
+    function handleChecklistSelect() {
+      const dropdown = document.getElementById('checklistDropdown');
+      const loadBtn = document.getElementById('loadChecklistBtn');
+      loadBtn.disabled = !dropdown.value;
+    }
+    
+    // Load selected checklist
+    async function loadSelectedChecklist() {
+      const dropdown = document.getElementById('checklistDropdown');
+      const selectedOption = dropdown.options[dropdown.selectedIndex];
+      
+      if (!dropdown.value) return;
+      
+      showState1('processing');
+      document.getElementById('processing1Text').textContent = 'Loading checklist...';
+      
+      try {
+        checklistDocId = dropdown.value;
+        const source = selectedOption.dataset.source;
+        
+        if (!source) {
+          throw new Error('No source found for checklist');
+        }
+        
+        const content = await fetchDocumentContent(source);
+        checklistData = parseChecklist(content);
+        
+        renderChecklist(checklistData, 'checklistBody');
+        document.getElementById('itemCount').textContent = checklistData.length;
+        document.getElementById('extractedFromText').textContent = `Loaded: ${selectedOption.textContent}`;
+        
+        // Store the checklist name for validation naming
+        currentChecklistName = selectedOption.textContent;
+        
+        showState1('review');
+        
+      } catch (error) {
+        console.error('Error loading checklist:', error);
+        document.getElementById('error1Text').textContent = error.message;
+        showState1('error');
+      }
+    }
+    
+    // Track current checklist name for validation result naming
+    let currentChecklistName = '';
     async function handleRequirementsUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1180,6 +1371,7 @@
         }
         
         checklistDocId = checklistDoc.id;
+        currentChecklistName = checklistDoc.name; // Store for validation matching
         
         document.getElementById('processing1Text').textContent = 'Loading checklist content...';
         
@@ -1217,26 +1409,27 @@
     
     function parseChecklist(content) {
       // Parse markdown table format into structured data
-      // This is a simplified parser - adjust based on actual agent output
       const items = [];
       const lines = (typeof content === 'string' ? content : JSON.stringify(content)).split('\n');
       
+      console.log('Parsing checklist content, length:', content?.length);
+      
       let currentCategory = 'GENERAL';
-      let id = 1;
+      let idCounter = 1;
       
       for (const line of lines) {
-        // Check for category header
+        // Check for category header (### BRANDING, ### LAYOUT, etc.)
         if (line.startsWith('### ')) {
-          currentCategory = line.replace('### ', '').trim();
+          currentCategory = line.replace('### ', '').trim().toUpperCase();
           continue;
         }
         
-        // Check for table row
-        if (line.startsWith('|') && !line.includes('---') && !line.includes('ID')) {
+        // Check for table row (skip header row and separator)
+        if (line.startsWith('|') && !line.includes('---') && !line.toLowerCase().includes('| id') && !line.toLowerCase().includes('|id')) {
           const cells = line.split('|').map(c => c.trim()).filter(c => c);
-          if (cells.length >= 3) {
+          if (cells.length >= 2) {
             items.push({
-              id: cells[0] || id++,
+              id: cells[0] || idCounter++,
               assertion: cells[1] || '',
               expected: cells[2] || '',
               appliesTo: cells[3] || 'ALL',
@@ -1248,12 +1441,12 @@
         }
       }
       
-      // If parsing failed, return dummy data for testing
+      console.log('Parsed checklist items:', items.length);
+      
+      // If no items found, return message
       if (items.length === 0) {
         return [
-          { id: 1, assertion: 'Is the logo correct?', expected: 'Discover logo present', appliesTo: 'ALL', category: 'BRANDING', checked: true },
-          { id: 2, assertion: 'Is borrower address present?', expected: 'Address in correct position', appliesTo: 'ALL', category: 'LAYOUT', checked: true },
-          { id: 3, assertion: 'Is bankruptcy disclosure present?', expected: 'Disclosure at top', appliesTo: 'Bankruptcy', category: 'COMPLIANCE', checked: true }
+          { id: '-', assertion: 'No checklist items found - check document format', expected: '', appliesTo: '', category: 'ERROR', checked: false }
         ];
       }
       
@@ -1384,18 +1577,79 @@
         // Upload file
         afterSampleDocId = await uploadFile(file);
         
-        document.getElementById('processing2Text').textContent = 'Validating against checklist...';
+        document.getElementById('processing2Text').textContent = 'Starting validation...';
         
-        // Run Agent 3
-        const result = await runAgent(AGENT_CHECKLIST_VALIDATION, {
+        // Extract job code from current checklist name for matching
+        const jobCodeMatch = currentChecklistName?.match(/(US\d+)/i);
+        const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
+        console.log('Job code for matching:', jobCode);
+        
+        // Fire off Agent 3 (don't wait)
+        await runAgent(AGENT_CHECKLIST_VALIDATION, {
           after_sample: afterSampleDocId,
           checklist_id: checklistDocId
         });
         
-        // Parse and display results
-        validationResults = parseValidationResults(result.content || result);
+        // Poll for validation result document
+        // Agent names it: "[JOB CODE] - QA Validation - [CLIENT NAME] - [LOAN NUMBER]"
+        let validationDoc = null;
+        let attempts = 0;
+        const maxAttempts = 90; // 3 minutes max
         
-        document.getElementById('afterSampleName').textContent = file.name;
+        while (!validationDoc && attempts < maxAttempts) {
+          await sleep(2000);
+          attempts++;
+          
+          document.getElementById('processing2Text').textContent = `Validating... (${attempts * 2}s)`;
+          
+          try {
+            const docs = await apiCall('/objects?limit=50&offset=0');
+            const docList = Array.isArray(docs) ? docs : docs?.objects || [];
+            
+            // Find validation result created recently that matches our job
+            const fiveMinAgo = Date.now() - 5 * 60 * 1000;
+            validationDoc = docList.find(d => {
+              const createdAt = new Date(d.created_at).getTime();
+              const isRecent = createdAt > fiveMinAgo;
+              const isValidation = d.name?.toLowerCase().includes('validation');
+              const matchesJob = jobCode ? d.name?.includes(jobCode) : true;
+              
+              if (isRecent && isValidation) {
+                console.log('Candidate validation doc:', d.name, 'matches job:', matchesJob);
+              }
+              
+              return isRecent && isValidation && matchesJob;
+            });
+            
+            if (validationDoc) {
+              console.log('Found validation doc:', validationDoc);
+            }
+            
+          } catch (pollErr) {
+            console.warn('Poll error:', pollErr);
+          }
+        }
+        
+        if (!validationDoc) {
+          throw new Error('Validation result not found after 3 minutes. Check Vertesia for status.');
+        }
+        
+        document.getElementById('processing2Text').textContent = 'Loading results...';
+        
+        // Fetch validation content
+        const content = await fetchDocumentContent(validationDoc.content?.source);
+        console.log('Validation content preview:', content.substring(0, 500));
+        
+        // Parse and display results
+        validationResults = parseValidationResults(content);
+        
+        // Extract client info from validation doc name
+        // Format: "US297012 - QA Validation - Tina Tanner - 1472267267"
+        const nameParts = validationDoc.name?.split(' - ') || [];
+        const clientName = nameParts[2] || 'Unknown';
+        const loanNumber = nameParts[3] || 'Unknown';
+        
+        document.getElementById('afterSampleName').textContent = `${clientName} - ${loanNumber}`;
         document.getElementById('afterSampleMeta').textContent = 
           `State: ${validationResults.state || 'Unknown'} | Type: ${validationResults.type || 'Unknown'}`;
         
@@ -1414,47 +1668,69 @@
     function parseValidationResults(content) {
       // Parse the validation results from agent output
       const results = {
-        state: 'NY',
-        type: 'Bankruptcy Internal',
+        state: 'Unknown',
+        type: 'Unknown',
+        clientName: 'Unknown',
+        loanNumber: 'Unknown',
         items: []
       };
       
-      const lines = (typeof content === 'string' ? content : JSON.stringify(content)).split('\n');
+      console.log('Parsing validation content, length:', content?.length);
+      
+      const text = typeof content === 'string' ? content : JSON.stringify(content);
+      const lines = text.split('\n');
       
       for (const line of lines) {
         // Extract state
-        if (line.includes('State Detected:') || line.includes('**State:**')) {
-          const match = line.match(/:\s*([A-Z]{2})/);
+        if (line.includes('**State:**') || line.match(/^State:/i)) {
+          const match = line.match(/([A-Z]{2})\b/);
           if (match) results.state = match[1];
         }
         
         // Extract type
-        if (line.includes('Document Type:') || line.includes('**Type:**')) {
-          results.type = line.split(':').pop().trim();
+        if (line.includes('**Type:**') || line.match(/^Type:/i)) {
+          const typeMatch = line.split(':').slice(1).join(':').trim();
+          if (typeMatch && typeMatch.length < 100) results.type = typeMatch;
         }
         
-        // Parse result rows
-        if (line.startsWith('|') && !line.includes('---') && !line.includes('ID')) {
+        // Extract client name
+        if (line.includes('**Client Name:**') || line.match(/^Client Name:/i)) {
+          results.clientName = line.split(':').slice(1).join(':').trim();
+        }
+        
+        // Extract loan/account number
+        if (line.includes('**Loan/Account:**') || line.includes('**Loan Number:**') || line.match(/^Loan/i)) {
+          const numMatch = line.match(/(\d{5,})/);
+          if (numMatch) results.loanNumber = numMatch[1];
+        }
+        
+        // Parse result rows from markdown table
+        // Format: | ID | Assertion | Expected | Result | Finding |
+        if (line.startsWith('|') && !line.includes('---') && !line.toLowerCase().includes('| id') && !line.toLowerCase().includes('|id') && !line.includes('Metric')) {
           const cells = line.split('|').map(c => c.trim()).filter(c => c);
           if (cells.length >= 4) {
-            const result = cells[3]?.toUpperCase() || '';
-            results.items.push({
-              id: cells[0],
-              assertion: cells[1],
-              expected: cells[2],
-              result: result.includes('PASS') ? 'pass' : result.includes('FAIL') ? 'fail' : 'gap',
-              finding: cells[4] || ''
-            });
+            const resultText = cells[3]?.toUpperCase() || '';
+            // Only add if it looks like a real result row (has PASS/FAIL/GAP)
+            if (resultText.includes('PASS') || resultText.includes('FAIL') || resultText.includes('GAP')) {
+              results.items.push({
+                id: cells[0],
+                assertion: cells[1],
+                expected: cells[2] || '',
+                result: resultText.includes('PASS') ? 'pass' : resultText.includes('FAIL') ? 'fail' : 'gap',
+                finding: cells[4] || ''
+              });
+            }
           }
         }
       }
       
-      // If parsing failed, return dummy results
+      console.log('Parsed validation results:', results.items.length, 'items');
+      console.log('State:', results.state, 'Type:', results.type);
+      
+      // If no items found, create a message item
       if (results.items.length === 0) {
         results.items = [
-          { id: 1, assertion: 'Is the logo correct?', result: 'pass', finding: 'Discover logo present at top left' },
-          { id: 2, assertion: 'Is borrower address present?', result: 'pass', finding: 'Address correctly formatted' },
-          { id: 3, assertion: 'Is bankruptcy disclosure present?', result: 'pass', finding: 'Disclosure text matches template' }
+          { id: '-', assertion: 'Validation in progress or parsing error', result: 'gap', finding: 'Check Vertesia for full results' }
         ];
       }
       
