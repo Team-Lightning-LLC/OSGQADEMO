@@ -529,6 +529,13 @@
     .result-status.pass { background: var(--success-soft); color: var(--success); }
     .result-status.fail { background: #fdf0ef; color: var(--error); }
     .result-status.gap { background: #fef9e8; color: #b8860b; }
+    .result-status.na { background: #f0f0f0; color: #888; }
+    
+    .result-id {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
     
     .result-text { font-size: 13px; flex: 1; }
     .result-finding {
@@ -1681,43 +1688,58 @@
       const lines = text.split('\n');
       
       for (const line of lines) {
-        // Extract state
-        if (line.includes('**State:**') || line.match(/^State:/i)) {
+        // Extract state - handle **State:** or State: formats
+        if (line.match(/\*?\*?State\*?\*?:/i)) {
           const match = line.match(/([A-Z]{2})\b/);
           if (match) results.state = match[1];
         }
         
         // Extract type
-        if (line.includes('**Type:**') || line.match(/^Type:/i)) {
-          const typeMatch = line.split(':').slice(1).join(':').trim();
+        if (line.match(/\*?\*?Type\*?\*?:/i)) {
+          const typeMatch = line.replace(/\*\*/g, '').split(':').slice(1).join(':').trim();
           if (typeMatch && typeMatch.length < 100) results.type = typeMatch;
         }
         
         // Extract client name
-        if (line.includes('**Client Name:**') || line.match(/^Client Name:/i)) {
-          results.clientName = line.split(':').slice(1).join(':').trim();
+        if (line.match(/\*?\*?Client Name\*?\*?:/i)) {
+          results.clientName = line.replace(/\*\*/g, '').split(':').slice(1).join(':').trim();
         }
         
         // Extract loan/account number
-        if (line.includes('**Loan/Account:**') || line.includes('**Loan Number:**') || line.match(/^Loan/i)) {
+        if (line.match(/\*?\*?(Loan\/Account|Loan Number)\*?\*?:/i)) {
           const numMatch = line.match(/(\d{5,})/);
           if (numMatch) results.loanNumber = numMatch[1];
         }
         
-        // Parse result rows from markdown table
-        // Format: | ID | Assertion | Expected | Result | Finding |
-        if (line.startsWith('|') && !line.includes('---') && !line.toLowerCase().includes('| id') && !line.toLowerCase().includes('|id') && !line.includes('Metric')) {
-          const cells = line.split('|').map(c => c.trim()).filter(c => c);
-          if (cells.length >= 4) {
-            const resultText = cells[3]?.toUpperCase() || '';
-            // Only add if it looks like a real result row (has PASS/FAIL/GAP)
-            if (resultText.includes('PASS') || resultText.includes('FAIL') || resultText.includes('GAP')) {
+        // Skip separator rows and header rows
+        if (line.includes('|--') || line.includes('|-')) continue;
+        if (line.match(/\|\s*ID\s*\|/i)) continue;
+        
+        // Parse result rows - table format: | ID | Assertion | Expected | Applies To | Result | Finding |
+        if (line.startsWith('|') && line.includes('|')) {
+          const cells = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c);
+          
+          // Need at least 5 columns and Result should be PASS/FAIL/GAP/N/A
+          if (cells.length >= 5) {
+            // Result is in column 5 (index 4) for 6-column table, or column 4 (index 3) for 5-column
+            const resultIndex = cells.length >= 6 ? 4 : 3;
+            const findingIndex = cells.length >= 6 ? 5 : 4;
+            const resultText = (cells[resultIndex] || '').toUpperCase();
+            
+            // Check if this looks like a real result row
+            if (resultText.includes('PASS') || resultText.includes('FAIL') || resultText.includes('GAP') || resultText.includes('N/A')) {
+              let resultValue = 'gap';
+              if (resultText.includes('PASS')) resultValue = 'pass';
+              else if (resultText.includes('FAIL')) resultValue = 'fail';
+              else if (resultText.includes('N/A')) resultValue = 'na';
+              
               results.items.push({
                 id: cells[0],
                 assertion: cells[1],
                 expected: cells[2] || '',
-                result: resultText.includes('PASS') ? 'pass' : resultText.includes('FAIL') ? 'fail' : 'gap',
-                finding: cells[4] || ''
+                appliesTo: cells.length >= 6 ? cells[3] : '',
+                result: resultValue,
+                finding: cells[findingIndex] || ''
               });
             }
           }
@@ -1725,7 +1747,7 @@
       }
       
       console.log('Parsed validation results:', results.items.length, 'items');
-      console.log('State:', results.state, 'Type:', results.type);
+      console.log('State:', results.state, 'Type:', results.type, 'Client:', results.clientName);
       
       // If no items found, create a message item
       if (results.items.length === 0) {
@@ -1745,17 +1767,23 @@
         const itemEl = document.createElement('div');
         itemEl.className = 'result-item';
         
-        const icon = item.result === 'pass' 
-          ? '<polyline points="20 6 9 17 4 12"/>'
-          : item.result === 'fail'
-          ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'
-          : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+        let icon;
+        if (item.result === 'pass') {
+          icon = '<polyline points="20 6 9 17 4 12"/>';
+        } else if (item.result === 'fail') {
+          icon = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
+        } else if (item.result === 'na') {
+          icon = '<line x1="5" y1="12" x2="19" y2="12"/>';
+        } else {
+          icon = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+        }
         
         itemEl.innerHTML = `
           <div class="result-status ${item.result}">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icon}</svg>
           </div>
           <div class="result-content">
+            <div class="result-id">ID: ${item.id}</div>
             <div class="result-text">${item.assertion}</div>
             ${item.finding ? `<div class="result-finding">${item.finding}</div>` : ''}
           </div>
@@ -1768,9 +1796,12 @@
       const passed = items.filter(i => i.result === 'pass').length;
       const failed = items.filter(i => i.result === 'fail').length;
       const gaps = items.filter(i => i.result === 'gap').length;
+      const na = items.filter(i => i.result === 'na').length;
       
-      document.getElementById('resultsSummary').innerHTML = 
-        `<strong>${passed} passed</strong> · ${failed} failed · ${gaps} gaps`;
+      let summary = `<strong>${passed} passed</strong> · ${failed} failed · ${gaps} gaps`;
+      if (na > 0) summary += ` · ${na} N/A`;
+      
+      document.getElementById('resultsSummary').innerHTML = summary;
     }
     
     function rerunValidation() {
