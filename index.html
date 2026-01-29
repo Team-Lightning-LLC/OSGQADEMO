@@ -783,14 +783,13 @@
         await runAgent(AGENT_CHECKLIST_GENERATION, { task: requirementsDocId });
         const jobCodeMatch = file.name.match(/\(([^)]+)\)/); const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
         let checklistDoc = null, attempts = 0;
-        while (!checklistDoc && attempts < 90) {
+        while (!checklistDoc) {
           await sleep(2000); attempts++; document.getElementById('processing1Text').textContent = `Waiting for checklist... (${attempts * 2}s)`;
           try { const docs = await apiCall('/objects?limit=30&offset=0'); const docList = Array.isArray(docs) ? docs : docs?.objects || [];
             const fiveMinAgo = Date.now() - 5 * 60 * 1000;
             checklistDoc = docList.find(d => new Date(d.created_at).getTime() > fiveMinAgo && d.name?.toLowerCase().includes('checklist') && (jobCode ? d.name?.includes(jobCode) : true));
           } catch (e) {}
         }
-        if (!checklistDoc) throw new Error('Checklist not found after 3 minutes');
         checklistDocId = checklistDoc.id; currentChecklistName = checklistDoc.name;
         document.getElementById('processing1Text').textContent = 'Loading content...';
         const content = await fetchDocumentContent(checklistDoc.content?.source); checklistData = parseChecklist(content);
@@ -842,14 +841,13 @@
         const jobCodeMatch = currentChecklistName?.match(/(US\d+)/i); const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
         await runAgent(AGENT_CHECKLIST_VALIDATION, { after_sample: afterSampleDocId, checklist_id: checklistDocId });
         let validationDoc = null, attempts = 0;
-        while (!validationDoc && attempts < 90) {
+        while (!validationDoc) {
           await sleep(2000); attempts++; document.getElementById('processing2Text').textContent = `Validating... (${attempts * 2}s)`;
           try { const docs = await apiCall('/objects?limit=50&offset=0'); const docList = Array.isArray(docs) ? docs : docs?.objects || [];
             const fiveMinAgo = Date.now() - 5 * 60 * 1000;
             validationDoc = docList.find(d => new Date(d.created_at).getTime() > fiveMinAgo && d.name?.toLowerCase().includes('validation') && (jobCode ? d.name?.includes(jobCode) : true));
           } catch (e) {}
         }
-        if (!validationDoc) throw new Error('Validation not found after 3 minutes');
         document.getElementById('processing2Text').textContent = 'Loading results...';
         const content = await fetchDocumentContent(validationDoc.content?.source); validationResults = parseValidationResults(content);
         const nameParts = validationDoc.name?.split(' - ') || [];
