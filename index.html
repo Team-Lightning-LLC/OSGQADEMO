@@ -3,709 +3,522 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OSG QA Checklist Generator</title>
+  <title>OSG QA Validation</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500&display=swap');
+    
     :root {
-      --primary: #0d2137;
-      --accent: #2a7d8c;
-      --accent-light: #3a9aad;
-      --accent-soft: #e6f3f5;
-      --ink: #1f2d3d;
-      --muted: #6c7a89;
-      --border: #dde2e8;
-      --bg: #f5f7f9;
-      --success: #28a745;
-      --success-soft: #e8f5e9;
-      --warning: #f0ad4e;
-      --error: #dc3545;
-      --error-soft: #fdf0ef;
-      --shadow: 0 2px 8px rgba(13,33,55,0.08);
+      --bg: #f5f1ea;
+      --surface: #fdfaf4;
+      --surface-hover: #faf7f0;
+      --text: #3d3830;
+      --text-2: #6a6259;
+      --text-3: #a09686;
+      --border: #e5ddd0;
+      --border-soft: #ede6db;
+      
+      --pass: #5a8a6a;
+      --pass-soft: #f0f5ef;
+      --pass-glow: rgba(90, 138, 106, 0.08);
+      
+      --fail: #c4785c;
+      --fail-soft: #faf2ed;
+      --fail-glow: rgba(196, 120, 92, 0.08);
+      
+      --gap: #9a9488;
+      --gap-soft: #f4f2ed;
+      
+      --accent: #5a7a8a;
+      --accent-soft: #eef2f4;
+      
+      --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      --grain-opacity: 0.025;
+      --surface-glow: linear-gradient(165deg, rgba(253,250,244,0.6) 0%, rgba(245,241,234,0.3) 100%);
+      --card-shadow: 0 1px 2px rgba(60, 50, 40, 0.03), 0 4px 12px rgba(60, 50, 40, 0.04);
+      --card-shadow-hover: 0 2px 4px rgba(60, 50, 40, 0.04), 0 8px 24px rgba(60, 50, 40, 0.06);
+    }
+    
+    [data-mode="moonlit"] {
+      --bg: #1a1d24;
+      --surface: #232730;
+      --surface-hover: #2a2e38;
+      --text: #d4d7e0;
+      --text-2: #9ba1b0;
+      --text-3: #6b7280;
+      --border: #363b47;
+      --border-soft: #2d313b;
+      
+      --pass: #6aab8c;
+      --pass-soft: rgba(106, 171, 140, 0.12);
+      --pass-glow: rgba(106, 171, 140, 0.08);
+      
+      --fail: #d4856f;
+      --fail-soft: rgba(212, 133, 111, 0.12);
+      --fail-glow: rgba(212, 133, 111, 0.08);
+      
+      --gap: #8890a0;
+      --gap-soft: rgba(136, 144, 160, 0.12);
+      
+      --accent: #7a9aaa;
+      --accent-soft: rgba(122, 154, 170, 0.12);
+      
+      --grain-opacity: 0.018;
+      --surface-glow: linear-gradient(165deg, rgba(45,50,60,0.4) 0%, rgba(26,29,36,0.2) 100%);
+      --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.15);
+      --card-shadow-hover: 0 2px 4px rgba(0, 0, 0, 0.15), 0 8px 24px rgba(0, 0, 0, 0.2);
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'IBM Plex Sans', -apple-system, sans-serif;
       background: var(--bg);
-      color: var(--ink);
+      color: var(--text);
       min-height: 100vh;
+      line-height: 1.6;
+      letter-spacing: 0.01em;
+      transition: background-color 0.5s ease, color 0.5s ease;
     }
     
-    /* Header */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: var(--grain);
+      opacity: var(--grain-opacity);
+      pointer-events: none;
+      z-index: 1000;
+    }
+    
     .header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      padding: 14px 32px;
+      background: var(--surface);
+      background-image: var(--surface-glow);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      transition: all 0.5s ease;
     }
     
-    .logo-section {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    .logo-section { display: flex; align-items: center; gap: 14px; }
     
     .logo {
-      width: 42px;
-      height: 42px;
-      background: var(--primary);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 800;
-      font-size: 14px;
+      width: 40px; height: 40px;
+      background: var(--text);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--bg);
+      font-weight: 700; font-size: 12px;
     }
     
-    .brand-text { color: white; }
-    .brand-name { font-size: 18px; font-weight: 700; }
-    .brand-sub { font-size: 11px; opacity: 0.8; }
-    
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .brand-name {
+      font-family: 'IBM Plex Serif', Georgia, serif;
+      font-size: 17px; font-weight: 500;
     }
     
-    .status-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: white;
-      font-size: 13px;
-    }
+    .brand-sub { font-size: 12px; color: var(--text-3); }
+    
+    .header-actions { display: flex; align-items: center; gap: 14px; }
+    
+    .status-badge { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
     
     .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #4ade80;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--pass);
+      animation: breathe 3s ease-in-out infinite;
     }
     
-    .status-dot.disconnected { background: #f87171; }
+    @keyframes breathe {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.1); }
+    }
+    
+    .status-dot.disconnected { background: var(--fail); animation: none; }
     
     .btn-header {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: white;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-2); padding: 10px 14px; border-radius: 8px;
+      font-family: inherit; font-size: 12px; cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: all 0.25s ease;
     }
     
-    .btn-header:hover { background: rgba(255,255,255,0.2); }
+    .btn-header:hover { border-color: var(--text-3); color: var(--text); }
     
-    /* Main Container */
-    .main-container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 24px 32px;
-    }
+    .main-container { max-width: 1300px; margin: 0 auto; padding: 32px; }
     
-    /* Workflow Grid */
-    .workflow-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
+    .workflow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
     
-    /* Workflow Panel */
     .workflow-panel {
-      background: white;
+      background: var(--surface);
+      background-image: var(--surface-glow);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 16px;
       overflow: hidden;
-      min-height: 600px;
-      display: flex;
-      flex-direction: column;
+      min-height: 580px;
+      display: flex; flex-direction: column;
+      box-shadow: var(--card-shadow);
+      transition: all 0.5s ease;
     }
     
-    .workflow-panel.locked {
-      opacity: 0.4;
-      pointer-events: none;
-    }
+    .workflow-panel.locked { opacity: 0.5; pointer-events: none; }
     
     .panel-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border-soft);
+      display: flex; align-items: center; justify-content: space-between;
     }
     
     .panel-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-family: 'IBM Plex Serif', Georgia, serif;
+      font-size: 16px; font-weight: 500;
+      display: flex; align-items: center; gap: 12px;
     }
     
     .step-number {
-      background: var(--accent);
-      color: white;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: 700;
+      background: var(--accent); color: white;
+      width: 26px; height: 26px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px; font-weight: 600;
     }
     
-    .workflow-panel.locked .step-number {
-      background: var(--muted);
-    }
+    .workflow-panel.locked .step-number { background: var(--text-3); }
     
-    .lock-icon {
-      color: var(--muted);
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
+    .lock-icon { color: var(--text-3); font-size: 11px; display: flex; align-items: center; gap: 6px; }
     
-    .panel-body {
-      padding: 20px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-    }
+    .panel-body { padding: 24px; flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
     
-    /* Upload Zone */
     .upload-zone {
-      border: 2px dashed var(--border);
-      border-radius: 10px;
-      padding: 40px 24px;
+      border: 1.5px dashed var(--border);
+      border-radius: 14px;
+      padding: 44px 28px;
       text-align: center;
       cursor: pointer;
-      transition: all 0.15s;
+      transition: all 0.3s ease;
+      background: linear-gradient(180deg, var(--bg) 0%, rgba(0,0,0,0.01) 100%);
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
     }
     
-    .upload-zone:hover {
-      border-color: var(--accent);
-      background: var(--accent-soft);
-    }
-    
-    .upload-zone svg { color: var(--accent); margin-bottom: 12px; }
-    .upload-zone p { font-size: 14px; color: var(--ink); margin-bottom: 4px; }
-    .upload-zone small { font-size: 12px; color: var(--muted); }
-    
+    .upload-zone:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .upload-zone svg { color: var(--text-3); margin-bottom: 14px; opacity: 0.7; }
+    .upload-zone p { font-size: 14px; color: var(--text); margin-bottom: 6px; }
+    .upload-zone small { font-size: 12px; color: var(--text-3); }
     .upload-zone input[type="file"] { display: none; }
     
-    /* Processing Indicator */
     .processing-indicator {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 18px;
       background: var(--accent-soft);
-      border-radius: 8px;
-      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 20px;
     }
     
-    .spinner {
-      width: 18px;
-      height: 18px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .breath-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--accent);
+      animation: breathe 2s ease-in-out infinite;
     }
     
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .processing-indicator span { font-size: 13px; color: var(--text-2); }
     
-    .processing-indicator span {
-      font-size: 13px;
-      color: var(--accent);
-      font-weight: 500;
-    }
-    
-    /* Success Indicator */
     .success-indicator {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: var(--success-soft);
-      border-radius: 8px;
-      margin-bottom: 16px;
-      color: var(--success);
-      font-size: 13px;
-      font-weight: 500;
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px;
+      background: var(--pass-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      color: var(--pass);
+      font-size: 13px; font-weight: 500;
     }
     
-    /* Error Indicator */
     .error-indicator {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      background: var(--error-soft);
-      border-radius: 8px;
-      margin-bottom: 16px;
-      color: var(--error);
-      font-size: 13px;
-      font-weight: 500;
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px;
+      background: var(--fail-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 20px;
+      color: var(--fail);
+      font-size: 13px; font-weight: 500;
     }
     
-    /* Checklist */
     .checklist-container {
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 14px;
       overflow: hidden;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       flex: 1;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
+      background: var(--surface);
     }
     
     .checklist-header {
-      padding: 12px 16px;
+      padding: 14px 18px;
       background: var(--bg);
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      display: flex; align-items: center; justify-content: space-between;
     }
     
     .checklist-title { font-size: 13px; font-weight: 600; }
-    .checklist-count { font-size: 11px; color: var(--muted); }
+    .checklist-count { font-size: 12px; color: var(--text-3); }
     
-    .checklist-body {
-      flex: 1;
-      overflow-y: auto;
-      max-height: 400px;
-    }
+    .checklist-body { flex: 1; overflow-y: auto; max-height: 360px; }
     
     .category-header {
-      padding: 8px 16px;
-      background: var(--primary);
-      color: white;
-      font-size: 11px;
-      font-weight: 600;
+      padding: 10px 18px;
+      background: var(--text);
+      color: var(--bg);
+      font-size: 11px; font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
     }
     
     .checklist-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-soft);
+      transition: background 0.2s ease;
     }
     
     .checklist-item:hover { background: var(--bg); }
-    
-    .checklist-item.removed {
-      background: #fdf0ef;
-      opacity: 0.5;
-    }
-    
+    .checklist-item.removed { background: var(--fail-soft); opacity: 0.6; }
     .checklist-item.removed .item-text { text-decoration: line-through; }
     
-    .item-checkbox input {
-      width: 16px;
-      height: 16px;
-      margin-top: 2px;
-      cursor: pointer;
-    }
-    
+    .item-checkbox input { width: 16px; height: 16px; margin-top: 3px; cursor: pointer; accent-color: var(--accent); }
     .item-content { flex: 1; }
-    .item-id { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
-    .item-text { font-size: 13px; color: var(--ink); margin-bottom: 4px; }
-    .item-meta { font-size: 11px; color: var(--muted); }
+    .item-id { font-size: 10px; color: var(--text-3); margin-bottom: 3px; }
+    .item-text { font-size: 13px; color: var(--text); margin-bottom: 5px; }
+    .item-meta { font-size: 11px; color: var(--text-3); }
     .item-expected { color: var(--accent); }
     
-    /* Action Bar */
     .action-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 18px;
       background: var(--bg);
-      border-radius: 8px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
       margin-top: auto;
     }
     
-    .action-info {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    
-    .action-info strong { color: var(--ink); }
+    .action-info { font-size: 12px; color: var(--text-3); }
+    .action-info strong { color: var(--text); }
     
     .btn {
-      padding: 10px 18px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-    }
-    
-    .btn-primary:hover:not(:disabled) { background: var(--accent-light); }
-    
-    .btn-success {
-      background: var(--success);
-      color: white;
-    }
-    
-    .btn-success:hover:not(:disabled) { background: #229a3b; }
-    
-    .btn-secondary {
-      background: white;
-      color: var(--ink);
-      border: 1px solid var(--border);
-    }
-    
-    .btn-secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-    
-    /* Approved Badge */
-    .approved-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      background: var(--success-soft);
-      color: var(--success);
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-    
-    /* Background Documents */
-    .background-docs {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px;
-    }
-    
-    .background-docs-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      color: var(--muted);
-    }
-    
-    .background-docs-header span:first-of-type {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--ink);
-    }
-    
-    .background-docs-note {
-      font-size: 11px;
-      color: var(--muted);
-      font-style: italic;
-    }
-    
-    .background-docs-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .background-doc-group {
-      padding-left: 22px;
-    }
-    
-    .background-doc-group-title {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      margin-bottom: 4px;
-    }
-    
-    .background-doc-item {
-      font-size: 12px;
-      color: var(--ink);
-      padding: 3px 0;
-      opacity: 0.8;
-    }
-    
-    /* After Sample Info */
-    .after-sample-info {
-      background: var(--accent-soft);
-      border: 1px solid var(--accent);
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 16px;
-    }
-    
-    .after-sample-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 4px;
-    }
-    
-    .after-sample-meta {
-      font-size: 11px;
-      color: var(--muted);
-      padding-left: 22px;
-    }
-    
-    /* Results */
-    .results-container {
-      border: 1px solid var(--border);
+      padding: 12px 20px;
       border-radius: 10px;
-      overflow: hidden;
+      font-family: inherit;
+      font-size: 13px; font-weight: 500;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: flex; align-items: center; gap: 8px;
+      transition: all 0.25s ease;
     }
+    
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-success { background: var(--pass); color: white; border-color: var(--pass); }
+    .btn-success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover:not(:disabled) { border-color: var(--text-3); }
+    
+    .results-container { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); }
     
     .results-header {
-      padding: 14px 16px;
-      background: var(--primary);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 16px 18px;
+      background: var(--text);
+      color: var(--bg);
+      display: flex; align-items: center; justify-content: space-between;
     }
     
-    .results-title { font-size: 14px; font-weight: 600; }
+    .results-title { font-family: 'IBM Plex Serif', Georgia, serif; font-size: 14px; font-weight: 500; }
     
     .results-actions button {
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.2);
       color: white;
-      padding: 6px 12px;
-      border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
-      margin-left: 8px;
+      padding: 8px 14px; border-radius: 6px;
+      font-family: inherit; font-size: 11px;
+      cursor: pointer; margin-left: 8px;
+      transition: all 0.2s ease;
     }
     
-    .results-body { max-height: 350px; overflow-y: auto; }
+    .results-actions button:hover { background: rgba(255,255,255,0.2); }
+    
+    .results-body { max-height: 320px; overflow-y: auto; }
     
     .result-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 12px 16px;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border-soft);
     }
     
     .result-status {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 24px; height: 24px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);
     }
     
-    .result-status.pass { background: var(--success-soft); color: var(--success); }
-    .result-status.fail { background: #fdf0ef; color: var(--error); }
-    .result-status.gap { background: #fef9e8; color: #b8860b; }
-    .result-status.na { background: #f0f0f0; color: #888; }
+    .result-status.pass { background: var(--pass-soft); color: var(--pass); }
+    .result-status.fail { background: var(--fail-soft); color: var(--fail); }
+    .result-status.gap { background: var(--gap-soft); color: var(--gap); }
+    .result-status.na { background: var(--gap-soft); color: var(--text-3); }
     
-    .result-id {
-      font-size: 10px;
-      color: var(--muted);
-      margin-bottom: 2px;
+    .result-id { font-size: 10px; color: var(--text-3); margin-bottom: 3px; }
+    .result-text { font-size: 13px; flex: 1; color: var(--text); }
+    .result-finding { font-size: 12px; color: var(--text-2); margin-top: 6px; padding: 8px 12px; background: var(--bg); border-radius: 6px; }
+    
+    .after-sample-info {
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
     }
     
-    .result-text { font-size: 13px; flex: 1; }
-    .result-finding {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-      padding: 6px 10px;
-      background: var(--bg);
-      border-radius: 4px;
-    }
+    .after-sample-badge { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+    .after-sample-meta { font-size: 12px; color: var(--text-2); padding-left: 24px; }
     
-    /* Empty State */
     .empty-state {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       text-align: center;
-      color: var(--muted);
-      padding: 40px;
+      color: var(--text-3);
+      padding: 48px;
     }
     
-    .empty-state svg { margin-bottom: 16px; opacity: 0.3; }
-    .empty-state p { font-size: 14px; margin-bottom: 4px; }
+    .empty-state svg { margin-bottom: 18px; opacity: 0.4; }
+    .empty-state p { font-size: 14px; margin-bottom: 6px; color: var(--text-2); }
     .empty-state small { font-size: 12px; opacity: 0.7; }
     
-    /* Login Modal */
     .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(13,33,55,0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: fixed; inset: 0;
+      background: rgba(61, 56, 48, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
       z-index: 1000;
     }
     
     .modal-overlay.hidden { display: none; }
     
     .modal {
-      background: white;
-      border-radius: 12px;
-      width: 400px;
-      padding: 24px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      background: var(--surface);
+      background-image: var(--surface-glow);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 380px; padding: 32px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.15);
     }
     
-    .modal h2 {
-      font-size: 18px;
-      margin-bottom: 8px;
-      color: var(--primary);
-    }
-    
-    .modal p {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 20px;
-    }
+    .modal h2 { font-family: 'IBM Plex Serif', Georgia, serif; font-size: 20px; font-weight: 500; margin-bottom: 8px; }
+    .modal p { font-size: 13px; color: var(--text-3); margin-bottom: 24px; }
     
     .modal input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 14px;
-      margin-bottom: 12px;
+      width: 100%; padding: 14px 16px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-family: inherit; font-size: 14px;
+      margin-bottom: 14px;
+      background: var(--bg); color: var(--text);
+      transition: all 0.2s ease;
     }
     
-    .modal input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
+    .modal input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
     
     .modal button {
-      width: 100%;
-      padding: 12px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 600;
+      width: 100%; padding: 14px;
+      background: var(--text); color: var(--bg);
+      border: none; border-radius: 10px;
+      font-family: inherit; font-size: 14px; font-weight: 500;
       cursor: pointer;
+      transition: all 0.25s ease;
     }
     
-    .modal button:hover { background: var(--accent-light); }
-    .modal button:disabled { 
-      background: var(--muted); 
-      cursor: not-allowed; 
-    }
+    .modal button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .modal button:disabled { background: var(--text-3); cursor: not-allowed; transform: none; box-shadow: none; }
+    .modal .error { color: var(--fail); font-size: 12px; margin-top: 12px; text-align: center; }
     
-    .modal .error {
-      color: var(--error);
-      font-size: 12px;
-      margin-top: 8px;
-    }
-    
-    /* State visibility */
-    .hidden { display: none !important; }
-    
-    /* Source Selector */
-    .source-selector {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-    
-    .source-option {
-      flex: 1;
-      cursor: pointer;
-    }
-    
+    .source-selector { display: flex; gap: 12px; margin-bottom: 12px; }
+    .source-option { flex: 1; cursor: pointer; }
     .source-option input { display: none; }
     
     .source-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 14px;
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--muted);
-      transition: all 0.15s;
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 13px; color: var(--text-2);
+      transition: all 0.25s ease;
+      background: var(--surface);
     }
     
-    .source-option input:checked + .source-label {
-      border-color: var(--accent);
-      background: var(--accent-soft);
-      color: var(--accent);
-    }
+    .source-option input:checked + .source-label { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+    .source-label:hover { border-color: var(--text-3); }
     
-    .source-label:hover {
-      border-color: var(--accent);
-    }
-    
-    /* Checklist Dropdown */
-    .input-label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
+    .input-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
     
     .checklist-dropdown {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 14px;
-      color: var(--ink);
-      background: white;
-      cursor: pointer;
+      width: 100%; padding: 14px 16px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-family: inherit; font-size: 14px;
+      color: var(--text); background: var(--surface);
+      cursor: pointer; transition: all 0.2s ease;
     }
     
-    .checklist-dropdown:focus {
-      outline: none;
-      border-color: var(--accent);
+    .checklist-dropdown:focus { outline: none; border-color: var(--accent); }
+    
+    .background-docs { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+    .background-docs-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--text-2); }
+    .background-docs-header span:first-of-type { font-size: 12px; font-weight: 600; color: var(--text); }
+    .background-docs-note { font-size: 11px; color: var(--text-3); font-style: italic; }
+    .background-docs-list { display: flex; flex-direction: column; gap: 14px; }
+    .background-doc-group { padding-left: 24px; }
+    .background-doc-group-title { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px; }
+    .background-doc-item { font-size: 12px; color: var(--text-2); padding: 3px 0; }
+    
+    .approved-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 12px 18px;
+      background: var(--pass-soft);
+      color: var(--pass);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      margin-bottom: 20px;
     }
+    
+    .mode-toggle {
+      position: fixed; bottom: 24px; right: 24px;
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      background-image: var(--surface-glow);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.4s ease;
+      box-shadow: var(--card-shadow);
+      z-index: 100;
+    }
+    
+    .mode-toggle:hover { border-color: var(--text-3); transform: scale(1.08); box-shadow: var(--card-shadow-hover); }
+    .mode-toggle svg { width: 18px; height: 18px; color: var(--text-3); transition: all 0.4s ease; }
+    .mode-toggle:hover svg { color: var(--text-2); }
+    .mode-toggle .sun { display: none; }
+    .mode-toggle .moon { display: block; }
+    [data-mode="moonlit"] .mode-toggle .sun { display: block; }
+    [data-mode="moonlit"] .mode-toggle .moon { display: none; }
+    
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-  <!-- Login Modal -->
   <div class="modal-overlay" id="loginModal">
     <div class="modal">
-      <h2>OSG QA Checklist</h2>
+      <h2>QA Validation</h2>
       <p>Enter password to continue</p>
       <input type="password" id="passwordInput" placeholder="Password" onkeypress="if(event.key==='Enter')login()">
       <button id="loginBtn" onclick="login()">Connect</button>
@@ -713,18 +526,17 @@
     </div>
   </div>
 
-  <!-- Header -->
   <header class="header">
     <div class="logo-section">
       <div class="logo">OSG</div>
       <div class="brand-text">
-        <div class="brand-name">QA Checklist Generator</div>
+        <div class="brand-name">QA Validation</div>
         <div class="brand-sub">Requirements to Validation</div>
       </div>
     </div>
     <div class="header-actions">
       <div class="status-badge">
-        <div class="status-dot" id="connectionDot"></div>
+        <div class="status-dot disconnected" id="connectionDot"></div>
         <span id="connectionStatus">Disconnected</span>
       </div>
       <button class="btn-header" onclick="resetAll()">
@@ -738,260 +550,127 @@
     </div>
   </header>
   
-  <!-- Main -->
   <div class="main-container">
     <div class="workflow-grid">
       
-      <!-- Part 1: Checklist Generation -->
       <div class="workflow-panel" id="panel1">
         <div class="panel-header">
-          <div class="panel-title">
-            <span class="step-number">1</span>
-            Checklist Generation
-          </div>
+          <div class="panel-title"><span class="step-number">1</span> Checklist</div>
         </div>
         <div class="panel-body">
           
-          <!-- State: Upload -->
           <div id="state1-upload">
             <div class="source-selector">
               <label class="source-option">
                 <input type="radio" name="checklistSource" value="existing" onchange="toggleChecklistSource('existing')">
-                <span class="source-label">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                  Use Existing Checklist
-                </span>
+                <span class="source-label"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Use Existing</span>
               </label>
               <label class="source-option">
                 <input type="radio" name="checklistSource" value="new" checked onchange="toggleChecklistSource('new')">
-                <span class="source-label">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                  Upload New Requirements
-                </span>
+                <span class="source-label"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload New</span>
               </label>
             </div>
             
-            <!-- Existing Checklist Dropdown -->
-            <div id="existingChecklistSection" class="hidden" style="margin-top: 16px;">
+            <div id="existingChecklistSection" class="hidden" style="margin-top: 20px;">
               <label class="input-label">Select Checklist</label>
               <select id="checklistDropdown" class="checklist-dropdown" onchange="handleChecklistSelect()">
                 <option value="">-- Select a checklist --</option>
               </select>
-              <button class="btn btn-primary" style="margin-top: 12px; width: 100%;" onclick="loadSelectedChecklist()" id="loadChecklistBtn" disabled>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Load Checklist
-              </button>
+              <button class="btn btn-primary" style="margin-top: 14px; width: 100%;" onclick="loadSelectedChecklist()" id="loadChecklistBtn" disabled>Load Checklist</button>
             </div>
             
-            <!-- Upload New -->
-            <div id="newUploadSection" style="margin-top: 16px;">
+            <div id="newUploadSection" style="margin-top: 20px;">
               <div class="upload-zone" onclick="document.getElementById('requirementsFile').click()">
                 <input type="file" id="requirementsFile" accept=".pdf,.docx,.doc,.txt" onchange="handleRequirementsUpload(event)">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-                <p>Upload Requirements Document</p>
-                <small>PDF, DOCX, TXT supported</small>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p>Drop requirements document</p>
+                <small>PDF, DOCX, TXT</small>
               </div>
             </div>
           </div>
           
-          <!-- State: Processing -->
           <div id="state1-processing" class="hidden">
-            <div class="processing-indicator">
-              <div class="spinner"></div>
-              <span id="processing1Text">Uploading document...</span>
-            </div>
-            <div class="empty-state">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-              </svg>
-              <p>Analyzing requirements...</p>
-            </div>
+            <div class="processing-indicator"><div class="breath-dot"></div><span id="processing1Text">Uploading...</span></div>
+            <div class="empty-state"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Analyzing requirements</p></div>
           </div>
           
-          <!-- State: Review Checklist -->
           <div id="state1-review" class="hidden">
-            <div class="success-indicator">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              <span id="extractedFromText">Extracted from document</span>
-            </div>
-            
+            <div class="success-indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="extractedFromText">Extracted from document</span></div>
             <div class="checklist-container">
-              <div class="checklist-header">
-                <span class="checklist-title">Generated Checklist</span>
-                <span class="checklist-count"><span id="itemCount">0</span> items</span>
-              </div>
-              <div class="checklist-body" id="checklistBody">
-                <!-- Checklist items will be inserted here -->
-              </div>
+              <div class="checklist-header"><span class="checklist-title">Generated Checklist</span><span class="checklist-count"><span id="itemCount">0</span> items</span></div>
+              <div class="checklist-body" id="checklistBody"></div>
             </div>
-            
             <div class="action-bar">
-              <div class="action-info" id="changesSummary">Review items and approve when ready</div>
-              <button class="btn btn-success" onclick="approveChecklist()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                Approve Checklist
-              </button>
+              <div class="action-info" id="changesSummary">Review and approve when ready</div>
+              <button class="btn btn-success" onclick="approveChecklist()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Approve</button>
             </div>
           </div>
           
-          <!-- State: Approved -->
           <div id="state1-approved" class="hidden">
-            <div class="success-indicator">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>Checklist Approved — Ready for validation</span>
-            </div>
-            
+            <div class="success-indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Approved — Ready for validation</span></div>
             <div class="checklist-container" style="opacity: 0.85;">
-              <div class="checklist-header">
-                <span class="checklist-title">Approved Checklist</span>
-                <span class="checklist-count" id="approvedItemCount">0 items</span>
-              </div>
-              <div class="checklist-body" id="approvedChecklistBody">
-                <!-- Approved checklist items will be inserted here -->
-              </div>
+              <div class="checklist-header"><span class="checklist-title">Approved Checklist</span><span class="checklist-count" id="approvedItemCount">0 items</span></div>
+              <div class="checklist-body" id="approvedChecklistBody"></div>
             </div>
-            
-            <div class="action-bar">
-              <div class="action-info">Checklist locked for validation</div>
-              <button class="btn btn-secondary" onclick="editChecklist()">Edit Checklist</button>
-            </div>
+            <div class="action-bar"><div class="action-info">Locked for validation</div><button class="btn btn-secondary" onclick="editChecklist()">Edit</button></div>
           </div>
           
-          <!-- State: Error -->
           <div id="state1-error" class="hidden">
-            <div class="error-indicator">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-              <span id="error1Text">An error occurred</span>
-            </div>
+            <div class="error-indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span id="error1Text">An error occurred</span></div>
             <button class="btn btn-secondary" onclick="resetPart1()">Try Again</button>
           </div>
           
         </div>
       </div>
       
-      <!-- Part 2: Validation -->
       <div class="workflow-panel locked" id="panel2">
         <div class="panel-header">
-          <div class="panel-title">
-            <span class="step-number">2</span>
-            Validation
-          </div>
-          <div class="lock-icon" id="lockIcon">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Approve checklist to unlock
-          </div>
+          <div class="panel-title"><span class="step-number">2</span> Validation</div>
+          <div class="lock-icon" id="lockIcon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Approve checklist to unlock</div>
         </div>
         <div class="panel-body">
           
-          <!-- State: Locked -->
           <div id="state2-locked">
-            <div class="empty-state">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="11" width="18" height="11" rx="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              <p>Validation Locked</p>
-              <small>Complete Part 1 to proceed</small>
-            </div>
+            <div class="empty-state"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><p>Validation Locked</p><small>Complete Part 1 to proceed</small></div>
           </div>
           
-          <!-- State: Upload After Sample -->
           <div id="state2-upload" class="hidden">
-            <div class="approved-badge">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              <span id="approvedBadgeText">Checklist Approved</span>
-            </div>
-            
-            <div class="upload-zone" onclick="document.getElementById('afterSampleFile').click()" style="margin-bottom: 20px;">
+            <div class="approved-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="approvedBadgeText">Checklist Approved</span></div>
+            <div class="upload-zone" onclick="document.getElementById('afterSampleFile').click()" style="margin-bottom: 24px;">
               <input type="file" id="afterSampleFile" accept=".pdf" onchange="handleAfterSampleUpload(event)">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              <p>Upload After Sample PDF</p>
-              <small>The output document to validate</small>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <p>Drop After Sample PDF</p>
+              <small>Document to validate</small>
             </div>
-            
             <div class="background-docs">
-              <div class="background-docs-header">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                <span>Reference Collections</span>
-                <span class="background-docs-note">(auto-selected by agent)</span>
-              </div>
+              <div class="background-docs-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Reference Collections</span><span class="background-docs-note">(auto-selected)</span></div>
               <div class="background-docs-list">
-                <div class="background-doc-group">
-                  <div class="background-doc-group-title">Letter Templates</div>
-                  <div class="background-doc-item">Bankruptcy Combo Attorney Cover, Internal Combo Letter, etc.</div>
-                </div>
-                <div class="background-doc-group">
-                  <div class="background-doc-group-title">Fee Schedules</div>
-                  <div class="background-doc-item">State-specific fee schedules (AR, CT, GA, HI, IL, NC, NJ, NV...)</div>
-                </div>
-                <div class="background-doc-group">
-                  <div class="background-doc-group-title">State Disclosures</div>
-                  <div class="background-doc-item">State Specific Verbiage, Bankruptcy State Specific Verbiage</div>
-                </div>
+                <div class="background-doc-group"><div class="background-doc-group-title">Letter Templates</div><div class="background-doc-item">Bankruptcy Combo, Internal Combo, etc.</div></div>
+                <div class="background-doc-group"><div class="background-doc-group-title">Fee Schedules</div><div class="background-doc-item">State-specific fee schedules</div></div>
+                <div class="background-doc-group"><div class="background-doc-group-title">State Disclosures</div><div class="background-doc-item">State-specific verbiage</div></div>
               </div>
             </div>
           </div>
           
-          <!-- State: Processing -->
           <div id="state2-processing" class="hidden">
-            <div class="processing-indicator">
-              <div class="spinner"></div>
-              <span id="processing2Text">Uploading After Sample...</span>
-            </div>
-            <div class="empty-state">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-              </svg>
-              <p>Validating against checklist...</p>
-            </div>
+            <div class="processing-indicator"><div class="breath-dot"></div><span id="processing2Text">Uploading...</span></div>
+            <div class="empty-state"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>Validating against checklist</p></div>
           </div>
           
-          <!-- State: Results -->
           <div id="state2-results" class="hidden">
             <div class="after-sample-info">
-              <div class="after-sample-badge">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-                <span id="afterSampleName">After Sample</span>
-              </div>
-              <div class="after-sample-meta" id="afterSampleMeta">
-                Validated using reference documents
-              </div>
+              <div class="after-sample-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span id="afterSampleName">After Sample</span></div>
+              <div class="after-sample-meta" id="afterSampleMeta">Validated</div>
             </div>
-            
             <div class="results-container">
-              <div class="results-header">
-                <span class="results-title">Validation Results</span>
-                <div class="results-actions">
-                  <button onclick="downloadResults()">Download</button>
-                  <button onclick="rerunValidation()">Rerun</button>
-                </div>
-              </div>
-              <div class="results-body" id="resultsBody">
-                <!-- Results will be inserted here -->
-              </div>
+              <div class="results-header"><span class="results-title">Validation Results</span><div class="results-actions"><button onclick="downloadResults()">Download</button><button onclick="rerunValidation()">Rerun</button></div></div>
+              <div class="results-body" id="resultsBody"></div>
             </div>
-            
-            <div class="action-bar" style="margin-top:16px;">
-              <div class="action-info" id="resultsSummary">Loading...</div>
-              <button class="btn btn-primary" onclick="downloadResults()">Download Report</button>
-            </div>
+            <div class="action-bar" style="margin-top:20px;"><div class="action-info" id="resultsSummary">Loading...</div><button class="btn btn-primary" onclick="downloadResults()">Download Report</button></div>
           </div>
           
-          <!-- State: Error -->
           <div id="state2-error" class="hidden">
-            <div class="error-indicator">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-              <span id="error2Text">An error occurred</span>
-            </div>
+            <div class="error-indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span id="error2Text">An error occurred</span></div>
             <button class="btn btn-secondary" onclick="resetPart2()">Try Again</button>
           </div>
           
@@ -1000,902 +679,225 @@
       
     </div>
   </div>
+  
+  <button class="mode-toggle" onclick="toggleMode()" title="Toggle moonlit mode">
+    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
 
   <script>
-    // ============================================================
-    // CONFIGURATION
-    // ============================================================
     const API_BASE = 'https://api.vertesia.io/api/v1';
     const STS_BASE = 'https://api.vertesia.io';
     const ENVIRONMENT_ID = '681915c6a01fb262a410c161';
     const PASSWORD = 'OSG2026Demo';
     const API_KEY = 'sk-25bf067b64952c430f0b786b52bf89f8';
-    
-    // Agent interaction names
     const AGENT_CHECKLIST_GENERATION = 'QAChecklistGeneration';
     const AGENT_CHECKLIST_VALIDATION = 'QAChecklistValidation';
-    
-    // Reference collection IDs
-    const COLLECTIONS = {
-      feeSchedule: '697a2fb42edd9bc3a382b569',
-      letterTemplate: '697a2fd2162b6cf60e59ee6a',
-      stateDisclosure: '697a2fde8767dd4a5e8d5b9e'
-    };
-    
-    // Model
     const MODEL = 'publishers/anthropic/models/claude-opus-4-5';
     
-    // ============================================================
-    // STATE
-    // ============================================================
-    let jwt = null;
-    let requirementsDocId = null;
-    let checklistDocId = null;
-    let afterSampleDocId = null;
-    let checklistData = [];
-    let validationResults = null;
+    let jwt = null, requirementsDocId = null, checklistDocId = null, afterSampleDocId = null;
+    let checklistData = [], validationResults = null, currentChecklistName = '';
     
-    // ============================================================
-    // AUTH
-    // ============================================================
+    function toggleMode() {
+      const html = document.documentElement;
+      if (html.getAttribute('data-mode') === 'moonlit') { html.removeAttribute('data-mode'); localStorage.removeItem('osg_mode'); }
+      else { html.setAttribute('data-mode', 'moonlit'); localStorage.setItem('osg_mode', 'moonlit'); }
+    }
+    
     async function login() {
       const password = document.getElementById('passwordInput').value.trim();
       const loginBtn = document.getElementById('loginBtn');
-      
-      if (password !== PASSWORD) {
-        showLoginError('Incorrect password');
-        return;
-      }
-      
-      // Show loading state
-      loginBtn.disabled = true;
-      loginBtn.textContent = 'Connecting...';
+      if (password !== PASSWORD) { showLoginError('Incorrect password'); return; }
+      loginBtn.disabled = true; loginBtn.textContent = 'Connecting...';
       document.getElementById('loginError').classList.add('hidden');
-      
       try {
-        // Exchange API key for JWT
-        const response = await fetch(`${STS_BASE}/auth/token`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${API_KEY}`
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to authenticate');
-        }
-        
-        const data = await response.json();
-        jwt = data.token;
-        
-        sessionStorage.setItem('osg_qa_jwt', jwt);
-        sessionStorage.setItem('osg_qa_authenticated', 'true');
-        
+        const response = await fetch(`${STS_BASE}/auth/token`, { method: 'GET', headers: { 'Authorization': `Bearer ${API_KEY}` } });
+        if (!response.ok) throw new Error('Failed to authenticate');
+        const data = await response.json(); jwt = data.token;
+        sessionStorage.setItem('osg_qa_jwt', jwt); sessionStorage.setItem('osg_qa_authenticated', 'true');
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('connectionDot').classList.remove('disconnected');
         document.getElementById('connectionStatus').textContent = 'Connected';
-        
-      } catch (error) {
-        console.error('Auth error:', error);
-        showLoginError('Authentication failed: ' + error.message);
-        loginBtn.disabled = false;
-        loginBtn.textContent = 'Connect';
-      }
+      } catch (error) { showLoginError('Authentication failed'); loginBtn.disabled = false; loginBtn.textContent = 'Connect'; }
     }
     
-    function logout() {
-      jwt = null;
-      sessionStorage.removeItem('osg_qa_jwt');
-      sessionStorage.removeItem('osg_qa_authenticated');
-      document.getElementById('loginModal').classList.remove('hidden');
-      document.getElementById('connectionDot').classList.add('disconnected');
-      document.getElementById('connectionStatus').textContent = 'Disconnected';
-      resetAll();
-    }
-    
-    function showLoginError(msg) {
-      const el = document.getElementById('loginError');
-      el.textContent = msg;
-      el.classList.remove('hidden');
-    }
+    function logout() { jwt = null; sessionStorage.removeItem('osg_qa_jwt'); sessionStorage.removeItem('osg_qa_authenticated'); document.getElementById('loginModal').classList.remove('hidden'); document.getElementById('connectionDot').classList.add('disconnected'); document.getElementById('connectionStatus').textContent = 'Disconnected'; resetAll(); }
+    function showLoginError(msg) { const el = document.getElementById('loginError'); el.textContent = msg; el.classList.remove('hidden'); }
     
     async function checkAuth() {
-      const authenticated = sessionStorage.getItem('osg_qa_authenticated');
-      const storedJwt = sessionStorage.getItem('osg_qa_jwt');
-      
-      if (authenticated === 'true' && storedJwt) {
-        jwt = storedJwt;
+      if (sessionStorage.getItem('osg_qa_authenticated') === 'true' && sessionStorage.getItem('osg_qa_jwt')) {
+        jwt = sessionStorage.getItem('osg_qa_jwt');
         document.getElementById('loginModal').classList.add('hidden');
         document.getElementById('connectionDot').classList.remove('disconnected');
         document.getElementById('connectionStatus').textContent = 'Connected';
       }
     }
     
-    // ============================================================
-    // API HELPERS
-    // ============================================================
     async function apiCall(endpoint, options = {}) {
-      const response = await fetch(`${API_BASE}${endpoint}`, {
-        ...options,
-        headers: {
-          'Authorization': `Bearer ${jwt}`,
-          'Content-Type': 'application/json',
-          ...options.headers
-        }
-      });
-      
-      if (!response.ok) {
-        const error = await response.text();
-        throw new Error(error || `API error: ${response.status}`);
-      }
-      
+      const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers: { 'Authorization': `Bearer ${jwt}`, 'Content-Type': 'application/json', ...options.headers } });
+      if (!response.ok) { const text = await response.text(); if (text.includes('exp') || text.includes('timestamp') || text.includes('<!DOCTYPE')) { logout(); throw new Error('Session expired. Please login again.'); } throw new Error(text || `API error: ${response.status}`); }
       return response.json();
     }
     
     async function uploadFile(file) {
-      // Determine content type - browsers sometimes don't set it for docx
-      let mimeType = file.type;
-      if (!mimeType || mimeType === '') {
-        const ext = file.name.split('.').pop().toLowerCase();
-        const mimeTypes = {
-          'pdf': 'application/pdf',
-          'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          'doc': 'application/msword',
-          'txt': 'text/plain',
-          'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'xls': 'application/vnd.ms-excel'
-        };
-        mimeType = mimeTypes[ext] || 'application/octet-stream';
-      }
-      
-      console.log('Uploading file:', file.name, 'MIME:', mimeType);
-      
-      // Step 1: Get upload URL
-      const uploadUrlRes = await apiCall('/objects/upload-url', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: file.name,
-          mime_type: mimeType
-        })
-      });
-      
-      console.log('Got upload URL:', uploadUrlRes);
-      
-      // Step 2: Upload to GCS
-      await fetch(uploadUrlRes.url, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': mimeType
-        }
-      });
-      
-      console.log('Uploaded to GCS');
-      
-      // Step 3: Create object record
-      const objectRes = await apiCall('/objects', {
-        method: 'POST',
-        body: JSON.stringify({
-          name: file.name,
-          content: {
-            source: uploadUrlRes.id,
-            type: mimeType,
-            name: file.name
-          }
-        })
-      });
-      
-      console.log('Created object:', objectRes);
-      
+      let mimeType = file.type || ({ pdf: 'application/pdf', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', doc: 'application/msword', txt: 'text/plain' }[file.name.split('.').pop().toLowerCase()] || 'application/octet-stream');
+      const uploadUrlRes = await apiCall('/objects/upload-url', { method: 'POST', body: JSON.stringify({ name: file.name, mime_type: mimeType }) });
+      await fetch(uploadUrlRes.url, { method: 'PUT', body: file, headers: { 'Content-Type': mimeType } });
+      const objectRes = await apiCall('/objects', { method: 'POST', body: JSON.stringify({ name: file.name, content: { source: uploadUrlRes.id, type: mimeType, name: file.name } }) });
       return objectRes.id;
     }
     
-    async function runAgent(interactionName, data) {
-      // Start execution - fire and forget
-      const execRes = await apiCall('/execute/async', {
-        method: 'POST',
-        body: JSON.stringify({
-          type: 'conversation',
-          interaction: interactionName,
-          data: data,
-          config: {
-            environment: ENVIRONMENT_ID,
-            model: MODEL
-          },
-          interactive: true,
-          max_iterations: 100
-        })
-      });
-      
-      console.log('Agent started:', execRes);
-      return execRes;
-    }
+    async function runAgent(interactionName, data) { return await apiCall('/execute/async', { method: 'POST', body: JSON.stringify({ type: 'conversation', interaction: interactionName, data, config: { environment: ENVIRONMENT_ID, model: MODEL }, interactive: true, max_iterations: 100 }) }); }
+    function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
     
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    function toggleChecklistSource(source) { document.getElementById('existingChecklistSection').classList.toggle('hidden', source !== 'existing'); document.getElementById('newUploadSection').classList.toggle('hidden', source !== 'new'); if (source === 'existing') loadExistingChecklists(); }
     
-    // ============================================================
-    // PART 1: CHECKLIST GENERATION
-    // ============================================================
-    
-    // Toggle between existing checklist and new upload
-    function toggleChecklistSource(source) {
-      const existingSection = document.getElementById('existingChecklistSection');
-      const newSection = document.getElementById('newUploadSection');
-      
-      if (source === 'existing') {
-        existingSection.classList.remove('hidden');
-        newSection.classList.add('hidden');
-        loadExistingChecklists();
-      } else {
-        existingSection.classList.add('hidden');
-        newSection.classList.remove('hidden');
-      }
-    }
-    
-    // Load existing checklists from Vertesia
     async function loadExistingChecklists() {
-      const dropdown = document.getElementById('checklistDropdown');
-      dropdown.innerHTML = '<option value="">Loading...</option>';
-      
+      const dropdown = document.getElementById('checklistDropdown'); dropdown.innerHTML = '<option value="">Loading...</option>';
       try {
-        const docs = await apiCall('/objects?limit=100&offset=0');
-        const docList = Array.isArray(docs) ? docs : docs?.objects || [];
-        
-        // Filter for checklist documents
-        const checklists = docList.filter(d => 
-          d.name?.toLowerCase().includes('checklist') && 
-          !d.name?.toLowerCase().includes('validation')
-        );
-        
+        const docs = await apiCall('/objects?limit=100&offset=0'); const docList = Array.isArray(docs) ? docs : docs?.objects || [];
+        const checklists = docList.filter(d => d.name?.toLowerCase().includes('checklist') && !d.name?.toLowerCase().includes('validation'));
         dropdown.innerHTML = '<option value="">-- Select a checklist --</option>';
-        
-        checklists.forEach(doc => {
-          const option = document.createElement('option');
-          option.value = doc.id;
-          option.textContent = doc.name;
-          option.dataset.source = doc.content?.source || '';
-          dropdown.appendChild(option);
-        });
-        
-        if (checklists.length === 0) {
-          dropdown.innerHTML = '<option value="">No checklists found</option>';
-        }
-        
-      } catch (error) {
-        console.error('Failed to load checklists:', error);
-        dropdown.innerHTML = '<option value="">Error loading checklists</option>';
-      }
+        checklists.forEach(doc => { const opt = document.createElement('option'); opt.value = doc.id; opt.textContent = doc.name; opt.dataset.source = doc.content?.source || ''; dropdown.appendChild(opt); });
+        if (checklists.length === 0) dropdown.innerHTML = '<option value="">No checklists found</option>';
+      } catch (e) { dropdown.innerHTML = '<option value="">Error loading</option>'; }
     }
     
-    // Handle dropdown selection
-    function handleChecklistSelect() {
-      const dropdown = document.getElementById('checklistDropdown');
-      const loadBtn = document.getElementById('loadChecklistBtn');
-      loadBtn.disabled = !dropdown.value;
-    }
+    function handleChecklistSelect() { document.getElementById('loadChecklistBtn').disabled = !document.getElementById('checklistDropdown').value; }
     
-    // Load selected checklist
     async function loadSelectedChecklist() {
-      const dropdown = document.getElementById('checklistDropdown');
-      const selectedOption = dropdown.options[dropdown.selectedIndex];
-      
-      if (!dropdown.value) return;
-      
-      showState1('processing');
-      document.getElementById('processing1Text').textContent = 'Loading checklist...';
-      
+      const dropdown = document.getElementById('checklistDropdown'); const opt = dropdown.options[dropdown.selectedIndex]; if (!dropdown.value) return;
+      showState1('processing'); document.getElementById('processing1Text').textContent = 'Loading checklist...';
       try {
-        checklistDocId = dropdown.value;
-        const source = selectedOption.dataset.source;
-        
-        if (!source) {
-          throw new Error('No source found for checklist');
-        }
-        
-        const content = await fetchDocumentContent(source);
-        checklistData = parseChecklist(content);
-        
-        renderChecklist(checklistData, 'checklistBody');
-        document.getElementById('itemCount').textContent = checklistData.length;
-        document.getElementById('extractedFromText').textContent = `Loaded: ${selectedOption.textContent}`;
-        
-        // Store the checklist name for validation naming
-        currentChecklistName = selectedOption.textContent;
-        
-        showState1('review');
-        
-      } catch (error) {
-        console.error('Error loading checklist:', error);
-        document.getElementById('error1Text').textContent = error.message;
-        showState1('error');
-      }
+        checklistDocId = dropdown.value; const content = await fetchDocumentContent(opt.dataset.source); checklistData = parseChecklist(content);
+        renderChecklist(checklistData, 'checklistBody'); document.getElementById('itemCount').textContent = checklistData.length;
+        document.getElementById('extractedFromText').textContent = `Loaded: ${opt.textContent}`; currentChecklistName = opt.textContent; showState1('review');
+      } catch (e) { document.getElementById('error1Text').textContent = e.message; showState1('error'); }
     }
     
-    // Track current checklist name for validation result naming
-    let currentChecklistName = '';
     async function handleRequirementsUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      showState1('processing');
-      document.getElementById('processing1Text').textContent = 'Uploading document...';
-      
+      const file = event.target.files[0]; if (!file) return;
+      showState1('processing'); document.getElementById('processing1Text').textContent = 'Uploading...';
       try {
-        // Upload file
-        requirementsDocId = await uploadFile(file);
-        
-        document.getElementById('processing1Text').textContent = 'Starting checklist extraction...';
-        
-        // Fire off Agent 1 (don't wait for it)
-        await runAgent(AGENT_CHECKLIST_GENERATION, {
-          task: requirementsDocId
-        });
-        
-        // Extract job code from filename (e.g., "US297012" from "Client requirment (US297012).docx")
-        const jobCodeMatch = file.name.match(/\(([^)]+)\)/);
-        const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
-        console.log('Job code extracted:', jobCode);
-        
-        // Poll for checklist document to appear
-        let checklistDoc = null;
-        let attempts = 0;
-        const maxAttempts = 90; // 3 minutes max (2s intervals)
-        
-        while (!checklistDoc && attempts < maxAttempts) {
-          await sleep(2000);
-          attempts++;
-          
-          document.getElementById('processing1Text').textContent = `Waiting for checklist... (${attempts * 2}s)`;
-          
-          try {
-            // Search for recent documents
-            const docs = await apiCall('/objects?limit=30&offset=0');
-            const docList = Array.isArray(docs) ? docs : docs?.objects || [];
-            
-            // Find a checklist document that matches our job code
+        requirementsDocId = await uploadFile(file); document.getElementById('processing1Text').textContent = 'Starting extraction...';
+        await runAgent(AGENT_CHECKLIST_GENERATION, { task: requirementsDocId });
+        const jobCodeMatch = file.name.match(/\(([^)]+)\)/); const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
+        let checklistDoc = null, attempts = 0;
+        while (!checklistDoc && attempts < 90) {
+          await sleep(2000); attempts++; document.getElementById('processing1Text').textContent = `Waiting for checklist... (${attempts * 2}s)`;
+          try { const docs = await apiCall('/objects?limit=30&offset=0'); const docList = Array.isArray(docs) ? docs : docs?.objects || [];
             const fiveMinAgo = Date.now() - 5 * 60 * 1000;
-            checklistDoc = docList.find(d => {
-              const createdAt = new Date(d.created_at).getTime();
-              const isRecent = createdAt > fiveMinAgo;
-              const isChecklist = d.name?.toLowerCase().includes('checklist');
-              const matchesJob = jobCode ? d.name?.includes(jobCode) : true;
-              return isRecent && isChecklist && matchesJob;
-            });
-            
-            if (checklistDoc) {
-              console.log('Found checklist doc:', checklistDoc);
-            }
-            
-          } catch (pollErr) {
-            console.warn('Poll error:', pollErr);
-          }
+            checklistDoc = docList.find(d => new Date(d.created_at).getTime() > fiveMinAgo && d.name?.toLowerCase().includes('checklist') && (jobCode ? d.name?.includes(jobCode) : true));
+          } catch (e) {}
         }
-        
-        if (!checklistDoc) {
-          throw new Error('Checklist not found after 3 minutes. Check Vertesia for status.');
-        }
-        
-        checklistDocId = checklistDoc.id;
-        currentChecklistName = checklistDoc.name; // Store for validation matching
-        
-        document.getElementById('processing1Text').textContent = 'Loading checklist content...';
-        
-        // Fetch the checklist content
-        const content = await fetchDocumentContent(checklistDoc.content?.source);
-        console.log('Checklist content:', content.substring(0, 500));
-        
-        // Parse and display checklist
-        checklistData = parseChecklist(content);
-        
-        renderChecklist(checklistData, 'checklistBody');
-        document.getElementById('itemCount').textContent = checklistData.length;
-        document.getElementById('extractedFromText').textContent = `Extracted from ${file.name}`;
-        
-        showState1('review');
-        
-      } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('error1Text').textContent = error.message;
-        showState1('error');
-      }
+        if (!checklistDoc) throw new Error('Checklist not found after 3 minutes');
+        checklistDocId = checklistDoc.id; currentChecklistName = checklistDoc.name;
+        document.getElementById('processing1Text').textContent = 'Loading content...';
+        const content = await fetchDocumentContent(checklistDoc.content?.source); checklistData = parseChecklist(content);
+        renderChecklist(checklistData, 'checklistBody'); document.getElementById('itemCount').textContent = checklistData.length;
+        document.getElementById('extractedFromText').textContent = `Extracted from ${file.name}`; showState1('review');
+      } catch (e) { document.getElementById('error1Text').textContent = e.message; showState1('error'); }
     }
     
-    async function fetchDocumentContent(source) {
-      if (!source) throw new Error('No source for document');
-      
-      const { url } = await apiCall('/objects/download-url', {
-        method: 'POST',
-        body: JSON.stringify({ file: source, format: 'original' })
-      });
-      
-      const res = await fetch(url);
-      return await res.text();
-    }
+    async function fetchDocumentContent(source) { if (!source) throw new Error('No source'); const { url } = await apiCall('/objects/download-url', { method: 'POST', body: JSON.stringify({ file: source, format: 'original' }) }); return await (await fetch(url)).text(); }
     
     function parseChecklist(content) {
-      // Parse markdown table format into structured data
-      const items = [];
-      const lines = (typeof content === 'string' ? content : JSON.stringify(content)).split('\n');
-      
-      console.log('Parsing checklist content, length:', content?.length);
-      
-      let currentCategory = 'GENERAL';
-      let idCounter = 1;
-      
-      for (const line of lines) {
-        // Check for category header (### BRANDING, ### LAYOUT, etc.)
-        if (line.startsWith('### ')) {
-          currentCategory = line.replace('### ', '').trim().toUpperCase();
-          continue;
-        }
-        
-        // Check for table row (skip header row and separator)
-        if (line.startsWith('|') && !line.includes('---') && !line.toLowerCase().includes('| id') && !line.toLowerCase().includes('|id')) {
-          const cells = line.split('|').map(c => c.trim()).filter(c => c);
-          if (cells.length >= 2) {
-            items.push({
-              id: cells[0] || idCounter++,
-              assertion: cells[1] || '',
-              expected: cells[2] || '',
-              appliesTo: cells[3] || 'ALL',
-              source: cells[4] || '',
-              category: currentCategory,
-              checked: true
-            });
-          }
-        }
-      }
-      
-      console.log('Parsed checklist items:', items.length);
-      
-      // If no items found, return message
-      if (items.length === 0) {
-        return [
-          { id: '-', assertion: 'No checklist items found - check document format', expected: '', appliesTo: '', category: 'ERROR', checked: false }
-        ];
-      }
-      
-      return items;
+      const items = [], lines = (typeof content === 'string' ? content : JSON.stringify(content)).split('\n'); let currentCategory = 'GENERAL', idCounter = 1;
+      for (const line of lines) { if (line.startsWith('### ')) { currentCategory = line.replace('### ', '').trim().toUpperCase(); continue; }
+        if (line.startsWith('|') && !line.includes('---') && !line.toLowerCase().includes('| id')) { const cells = line.split('|').map(c => c.trim()).filter(c => c);
+          if (cells.length >= 2) items.push({ id: cells[0] || idCounter++, assertion: cells[1] || '', expected: cells[2] || '', appliesTo: cells[3] || 'ALL', category: currentCategory, checked: true }); } }
+      return items.length ? items : [{ id: '-', assertion: 'No items found - check format', expected: '', appliesTo: '', category: 'ERROR', checked: false }];
     }
     
     function renderChecklist(items, containerId) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      
-      let currentCategory = null;
-      
-      for (const item of items) {
-        // Add category header if needed
-        if (item.category !== currentCategory) {
-          currentCategory = item.category;
-          const header = document.createElement('div');
-          header.className = 'category-header';
-          header.textContent = currentCategory;
-          container.appendChild(header);
-        }
-        
-        const itemEl = document.createElement('div');
-        itemEl.className = 'checklist-item' + (item.checked ? '' : ' removed');
-        itemEl.innerHTML = `
-          <div class="item-checkbox">
-            <input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${item.id})">
-          </div>
-          <div class="item-content">
-            <div class="item-id">ID: ${item.id}</div>
-            <div class="item-text">${item.assertion}</div>
-            <div class="item-meta">Expected: <span class="item-expected">${item.expected}</span> · Applies to: ${item.appliesTo}</div>
-          </div>
-        `;
-        container.appendChild(itemEl);
-      }
+      const container = document.getElementById(containerId); container.innerHTML = ''; let currentCategory = null;
+      for (const item of items) { if (item.category !== currentCategory) { currentCategory = item.category; const h = document.createElement('div'); h.className = 'category-header'; h.textContent = currentCategory; container.appendChild(h); }
+        const el = document.createElement('div'); el.className = 'checklist-item' + (item.checked ? '' : ' removed');
+        el.innerHTML = `<div class="item-checkbox"><input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${item.id})"></div><div class="item-content"><div class="item-id">ID: ${item.id}</div><div class="item-text">${item.assertion}</div><div class="item-meta">Expected: <span class="item-expected">${item.expected}</span> · ${item.appliesTo}</div></div>`;
+        container.appendChild(el); }
     }
     
-    function toggleItem(id) {
-      const item = checklistData.find(i => i.id == id);
-      if (item) {
-        item.checked = !item.checked;
-        renderChecklist(checklistData, 'checklistBody');
-        updateChangesSummary();
-      }
-    }
+    function toggleItem(id) { const item = checklistData.find(i => i.id == id); if (item) { item.checked = !item.checked; renderChecklist(checklistData, 'checklistBody'); updateChangesSummary(); } }
+    function updateChangesSummary() { const removed = checklistData.filter(i => !i.checked).length; document.getElementById('changesSummary').innerHTML = removed > 0 ? `<strong>${removed} removed</strong>` : 'Review and approve when ready'; }
     
-    function updateChangesSummary() {
-      const removed = checklistData.filter(i => !i.checked).length;
-      const el = document.getElementById('changesSummary');
-      if (removed > 0) {
-        el.innerHTML = `<strong>${removed} item${removed > 1 ? 's' : ''} removed</strong>`;
-      } else {
-        el.textContent = 'Review items and approve when ready';
-      }
-    }
-    
-    function approveChecklist() {
-      // Filter to only checked items
-      const approvedItems = checklistData.filter(i => i.checked);
-      
-      // Render approved checklist (read-only)
-      renderChecklistReadOnly(approvedItems, 'approvedChecklistBody');
-      document.getElementById('approvedItemCount').textContent = `${approvedItems.length} items`;
-      document.getElementById('approvedBadgeText').textContent = `Checklist Approved (${approvedItems.length} items)`;
-      
-      showState1('approved');
-      unlockPart2();
-    }
+    function approveChecklist() { const approved = checklistData.filter(i => i.checked); renderChecklistReadOnly(approved, 'approvedChecklistBody'); document.getElementById('approvedItemCount').textContent = `${approved.length} items`; document.getElementById('approvedBadgeText').textContent = `Approved (${approved.length} items)`; showState1('approved'); unlockPart2(); }
     
     function renderChecklistReadOnly(items, containerId) {
-      const container = document.getElementById(containerId);
-      container.innerHTML = '';
-      
-      let currentCategory = null;
-      
-      for (const item of items) {
-        if (item.category !== currentCategory) {
-          currentCategory = item.category;
-          const header = document.createElement('div');
-          header.className = 'category-header';
-          header.textContent = currentCategory;
-          container.appendChild(header);
-        }
-        
-        const itemEl = document.createElement('div');
-        itemEl.className = 'checklist-item';
-        itemEl.style.pointerEvents = 'none';
-        itemEl.innerHTML = `
-          <div class="item-content">
-            <div class="item-id">ID: ${item.id}</div>
-            <div class="item-text">${item.assertion}</div>
-            <div class="item-meta">Expected: <span class="item-expected">${item.expected}</span> · Applies to: ${item.appliesTo}</div>
-          </div>
-        `;
-        container.appendChild(itemEl);
-      }
+      const container = document.getElementById(containerId); container.innerHTML = ''; let currentCategory = null;
+      for (const item of items) { if (item.category !== currentCategory) { currentCategory = item.category; const h = document.createElement('div'); h.className = 'category-header'; h.textContent = currentCategory; container.appendChild(h); }
+        const el = document.createElement('div'); el.className = 'checklist-item'; el.style.pointerEvents = 'none';
+        el.innerHTML = `<div class="item-content"><div class="item-id">ID: ${item.id}</div><div class="item-text">${item.assertion}</div><div class="item-meta">Expected: <span class="item-expected">${item.expected}</span> · ${item.appliesTo}</div></div>`;
+        container.appendChild(el); }
     }
     
-    function editChecklist() {
-      showState1('review');
-      lockPart2();
-    }
-    
-    // ============================================================
-    // PART 2: VALIDATION
-    // ============================================================
-    function unlockPart2() {
-      document.getElementById('panel2').classList.remove('locked');
-      document.getElementById('lockIcon').classList.add('hidden');
-      showState2('upload');
-    }
-    
-    function lockPart2() {
-      document.getElementById('panel2').classList.add('locked');
-      document.getElementById('lockIcon').classList.remove('hidden');
-      showState2('locked');
-    }
+    function editChecklist() { showState1('review'); lockPart2(); }
+    function unlockPart2() { document.getElementById('panel2').classList.remove('locked'); document.getElementById('lockIcon').classList.add('hidden'); showState2('upload'); }
+    function lockPart2() { document.getElementById('panel2').classList.add('locked'); document.getElementById('lockIcon').classList.remove('hidden'); showState2('locked'); }
     
     async function handleAfterSampleUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      
-      showState2('processing');
-      document.getElementById('processing2Text').textContent = 'Uploading After Sample...';
-      
+      const file = event.target.files[0]; if (!file) return;
+      showState2('processing'); document.getElementById('processing2Text').textContent = 'Uploading...';
       try {
-        // Upload file
-        afterSampleDocId = await uploadFile(file);
-        
-        document.getElementById('processing2Text').textContent = 'Starting validation...';
-        
-        // Extract job code from current checklist name for matching
-        const jobCodeMatch = currentChecklistName?.match(/(US\d+)/i);
-        const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
-        console.log('Job code for matching:', jobCode);
-        
-        // Fire off Agent 3 (don't wait)
-        await runAgent(AGENT_CHECKLIST_VALIDATION, {
-          after_sample: afterSampleDocId,
-          checklist_id: checklistDocId
-        });
-        
-        // Poll for validation result document
-        // Agent names it: "[JOB CODE] - QA Validation - [CLIENT NAME] - [LOAN NUMBER]"
-        let validationDoc = null;
-        let attempts = 0;
-        const maxAttempts = 90; // 3 minutes max
-        
-        while (!validationDoc && attempts < maxAttempts) {
-          await sleep(2000);
-          attempts++;
-          
-          document.getElementById('processing2Text').textContent = `Validating... (${attempts * 2}s)`;
-          
-          try {
-            const docs = await apiCall('/objects?limit=50&offset=0');
-            const docList = Array.isArray(docs) ? docs : docs?.objects || [];
-            
-            // Find validation result created recently that matches our job
+        afterSampleDocId = await uploadFile(file); document.getElementById('processing2Text').textContent = 'Starting validation...';
+        const jobCodeMatch = currentChecklistName?.match(/(US\d+)/i); const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
+        await runAgent(AGENT_CHECKLIST_VALIDATION, { after_sample: afterSampleDocId, checklist_id: checklistDocId });
+        let validationDoc = null, attempts = 0;
+        while (!validationDoc && attempts < 90) {
+          await sleep(2000); attempts++; document.getElementById('processing2Text').textContent = `Validating... (${attempts * 2}s)`;
+          try { const docs = await apiCall('/objects?limit=50&offset=0'); const docList = Array.isArray(docs) ? docs : docs?.objects || [];
             const fiveMinAgo = Date.now() - 5 * 60 * 1000;
-            validationDoc = docList.find(d => {
-              const createdAt = new Date(d.created_at).getTime();
-              const isRecent = createdAt > fiveMinAgo;
-              const isValidation = d.name?.toLowerCase().includes('validation');
-              const matchesJob = jobCode ? d.name?.includes(jobCode) : true;
-              
-              if (isRecent && isValidation) {
-                console.log('Candidate validation doc:', d.name, 'matches job:', matchesJob);
-              }
-              
-              return isRecent && isValidation && matchesJob;
-            });
-            
-            if (validationDoc) {
-              console.log('Found validation doc:', validationDoc);
-            }
-            
-          } catch (pollErr) {
-            console.warn('Poll error:', pollErr);
-          }
+            validationDoc = docList.find(d => new Date(d.created_at).getTime() > fiveMinAgo && d.name?.toLowerCase().includes('validation') && (jobCode ? d.name?.includes(jobCode) : true));
+          } catch (e) {}
         }
-        
-        if (!validationDoc) {
-          throw new Error('Validation result not found after 3 minutes. Check Vertesia for status.');
-        }
-        
+        if (!validationDoc) throw new Error('Validation not found after 3 minutes');
         document.getElementById('processing2Text').textContent = 'Loading results...';
-        
-        // Fetch validation content
-        const content = await fetchDocumentContent(validationDoc.content?.source);
-        console.log('Validation content preview:', content.substring(0, 500));
-        
-        // Parse and display results
-        validationResults = parseValidationResults(content);
-        
-        // Use parsed values, fallback to doc name parts
-        // Format: "US297012 - QA Validation - Tina Tanner - 1472267267"
+        const content = await fetchDocumentContent(validationDoc.content?.source); validationResults = parseValidationResults(content);
         const nameParts = validationDoc.name?.split(' - ') || [];
-        const clientName = validationResults.clientName !== 'Unknown' ? validationResults.clientName : (nameParts[2] || 'Unknown');
-        const loanNumber = validationResults.loanNumber !== 'Unknown' ? validationResults.loanNumber : (nameParts[3] || 'Unknown');
-        
-        document.getElementById('afterSampleName').textContent = `${clientName} - ${loanNumber}`;
-        document.getElementById('afterSampleMeta').textContent = 
-          `State: ${validationResults.state || 'Unknown'} | Type: ${validationResults.type || 'Unknown'}`;
-        
-        renderResults(validationResults.items);
-        updateResultsSummary(validationResults.items);
-        
-        showState2('results');
-        
-      } catch (error) {
-        console.error('Error:', error);
-        document.getElementById('error2Text').textContent = error.message;
-        showState2('error');
-      }
+        document.getElementById('afterSampleName').textContent = `${validationResults.clientName !== 'Unknown' ? validationResults.clientName : (nameParts[2] || 'Unknown')} - ${validationResults.loanNumber !== 'Unknown' ? validationResults.loanNumber : (nameParts[3] || 'Unknown')}`;
+        document.getElementById('afterSampleMeta').textContent = `State: ${validationResults.state || 'Unknown'} | Type: ${validationResults.type || 'Unknown'}`;
+        renderResults(validationResults.items); updateResultsSummary(validationResults.items); showState2('results');
+      } catch (e) { document.getElementById('error2Text').textContent = e.message; showState2('error'); }
     }
     
     function parseValidationResults(content) {
-      // Parse the validation results from agent output
-      const results = {
-        state: 'Unknown',
-        type: 'Unknown',
-        clientName: 'Unknown',
-        loanNumber: 'Unknown',
-        items: []
-      };
-      
-      console.log('Parsing validation content, length:', content?.length);
-      
-      const text = typeof content === 'string' ? content : JSON.stringify(content);
-      const lines = text.split('\n');
-      
+      const results = { state: 'Unknown', type: 'Unknown', clientName: 'Unknown', loanNumber: 'Unknown', items: [] };
+      const lines = (typeof content === 'string' ? content : JSON.stringify(content)).split('\n');
       for (const line of lines) {
-        // Handle Field | Value table format
-        if (line.includes('|') && !line.includes('---')) {
-          const cells = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c);
-          
-          // Check for Field | Value pairs
-          if (cells.length === 2) {
-            const field = cells[0].toLowerCase();
-            const value = cells[1];
-            
-            if (field === 'state') results.state = value;
-            if (field === 'letter type' || field === 'type') results.type = value;
-            if (field === 'borrower' || field === 'client' || field === 'client name') results.clientName = value;
-            if (field === 'loan number' || field === 'loan/account') {
-              const numMatch = value.match(/(\d{5,})/);
-              if (numMatch) results.loanNumber = numMatch[1];
-            }
-          }
-        }
-        
-        // Also handle **State:** format (fallback)
-        if (line.match(/\*?\*?State\*?\*?:/i) && !line.includes('|')) {
-          const match = line.match(/([A-Z]{2})\b/);
-          if (match) results.state = match[1];
-        }
-        
-        if (line.match(/\*?\*?Type\*?\*?:/i) && !line.includes('|')) {
-          const typeMatch = line.replace(/\*\*/g, '').split(':').slice(1).join(':').trim();
-          if (typeMatch && typeMatch.length < 100) results.type = typeMatch;
-        }
-        
-        if (line.match(/\*?\*?Client Name\*?\*?:/i) && !line.includes('|')) {
-          results.clientName = line.replace(/\*\*/g, '').split(':').slice(1).join(':').trim();
-        }
-        
-        if (line.match(/\*?\*?(Loan\/Account|Loan Number)\*?\*?:/i) && !line.includes('|')) {
-          const numMatch = line.match(/(\d{5,})/);
-          if (numMatch) results.loanNumber = numMatch[1];
-        }
-        
-        // Skip separator rows and header rows for results table
-        if (line.includes('|--') || line.includes('|-')) continue;
-        if (line.match(/\|\s*ID\s*\|/i)) continue;
-        
-        // Parse result rows - table format: | ID | Assertion | Expected | Applies To | Result | Finding |
-        // Or simpler format: | ID | Assertion | Result | Finding |
-        if (line.startsWith('|') && line.includes('|')) {
-          const cells = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c);
-          
-          if (cells.length >= 4) {
-            // Determine which column has the result
-            let resultIndex = -1;
-            let findingIndex = -1;
-            
-            for (let i = 2; i < cells.length; i++) {
-              const cellUpper = cells[i].toUpperCase();
-              if (cellUpper.includes('PASS') || cellUpper.includes('FAIL') || cellUpper.includes('GAP') || cellUpper === 'NA' || cellUpper === 'N/A') {
-                resultIndex = i;
-                findingIndex = i + 1;
-                break;
-              }
-            }
-            
-            if (resultIndex > 0) {
-              const resultText = (cells[resultIndex] || '').toUpperCase();
-              let resultValue = 'gap';
-              if (resultText.includes('PASS')) resultValue = 'pass';
-              else if (resultText.includes('FAIL')) resultValue = 'fail';
-              else if (resultText === 'NA' || resultText === 'N/A') resultValue = 'na';
-              
-              results.items.push({
-                id: cells[0],
-                assertion: cells[1],
-                expected: resultIndex > 3 ? cells[2] : '',
-                appliesTo: resultIndex > 4 ? cells[3] : '',
-                result: resultValue,
-                finding: cells[findingIndex] || ''
-              });
-            }
-          }
-        }
-      }
-      
-      console.log('Parsed validation results:', results.items.length, 'items');
-      console.log('State:', results.state, 'Type:', results.type, 'Client:', results.clientName);
-      
-      // If no items found, create a message item
-      if (results.items.length === 0) {
-        results.items = [
-          { id: '-', assertion: 'Validation in progress or parsing error', result: 'gap', finding: 'Check Vertesia for full results' }
-        ];
-      }
-      
-      return results;
+        if (line.includes('|') && !line.includes('---')) { const cells = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c);
+          if (cells.length === 2) { const f = cells[0].toLowerCase(); if (f === 'state') results.state = cells[1]; if (f === 'letter type' || f === 'type') results.type = cells[1]; if (f === 'borrower' || f === 'client' || f === 'client name') results.clientName = cells[1]; if (f === 'loan number' || f === 'loan/account') { const m = cells[1].match(/(\d{5,})/); if (m) results.loanNumber = m[1]; } } }
+        if (line.match(/\*?\*?State\*?\*?:/i) && !line.includes('|')) { const m = line.match(/([A-Z]{2})\b/); if (m) results.state = m[1]; }
+        if (line.includes('|--') || line.includes('|-') || line.match(/\|\s*ID\s*\|/i)) continue;
+        if (line.startsWith('|') && line.includes('|')) { const cells = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c);
+          if (cells.length >= 4) { let ri = -1, fi = -1;
+            for (let i = 2; i < cells.length; i++) { const u = cells[i].toUpperCase(); if (u.includes('PASS') || u.includes('FAIL') || u.includes('GAP') || u === 'NA' || u === 'N/A') { ri = i; fi = i + 1; break; } }
+            if (ri > 0) { const rt = (cells[ri] || '').toUpperCase(); let rv = 'gap'; if (rt.includes('PASS')) rv = 'pass'; else if (rt.includes('FAIL')) rv = 'fail'; else if (rt === 'NA' || rt === 'N/A') rv = 'na';
+              results.items.push({ id: cells[0], assertion: cells[1], result: rv, finding: cells[fi] || '' }); } } } }
+      return results.items.length ? results : { ...results, items: [{ id: '-', assertion: 'Parsing error or in progress', result: 'gap', finding: 'Check Vertesia' }] };
     }
     
     function renderResults(items) {
-      const container = document.getElementById('resultsBody');
-      container.innerHTML = '';
-      
-      for (const item of items) {
-        const itemEl = document.createElement('div');
-        itemEl.className = 'result-item';
-        
-        let icon;
-        if (item.result === 'pass') {
-          icon = '<polyline points="20 6 9 17 4 12"/>';
-        } else if (item.result === 'fail') {
-          icon = '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>';
-        } else if (item.result === 'na') {
-          icon = '<line x1="5" y1="12" x2="19" y2="12"/>';
-        } else {
-          icon = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
-        }
-        
-        itemEl.innerHTML = `
-          <div class="result-status ${item.result}">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icon}</svg>
-          </div>
-          <div class="result-content">
-            <div class="result-id">ID: ${item.id}</div>
-            <div class="result-text">${item.assertion}</div>
-            ${item.finding ? `<div class="result-finding">${item.finding}</div>` : ''}
-          </div>
-        `;
-        container.appendChild(itemEl);
-      }
+      const container = document.getElementById('resultsBody'); container.innerHTML = '';
+      for (const item of items) { const el = document.createElement('div'); el.className = 'result-item';
+        let icon = item.result === 'pass' ? '<polyline points="20 6 9 17 4 12"/>' : item.result === 'fail' ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' : item.result === 'na' ? '<line x1="5" y1="12" x2="19" y2="12"/>' : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+        el.innerHTML = `<div class="result-status ${item.result}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icon}</svg></div><div class="result-content"><div class="result-id">ID: ${item.id}</div><div class="result-text">${item.assertion}</div>${item.finding ? `<div class="result-finding">${item.finding}</div>` : ''}</div>`;
+        container.appendChild(el); }
     }
     
-    function updateResultsSummary(items) {
-      const passed = items.filter(i => i.result === 'pass').length;
-      const failed = items.filter(i => i.result === 'fail').length;
-      const gaps = items.filter(i => i.result === 'gap').length;
-      const na = items.filter(i => i.result === 'na').length;
-      
-      let summary = `<strong>${passed} passed</strong> · ${failed} failed · ${gaps} gaps`;
-      if (na > 0) summary += ` · ${na} N/A`;
-      
-      document.getElementById('resultsSummary').innerHTML = summary;
-    }
+    function updateResultsSummary(items) { const p = items.filter(i => i.result === 'pass').length, f = items.filter(i => i.result === 'fail').length, g = items.filter(i => i.result === 'gap').length, n = items.filter(i => i.result === 'na').length;
+      document.getElementById('resultsSummary').innerHTML = `<strong>${p} passed</strong> · ${f} failed · ${g} gaps${n > 0 ? ` · ${n} N/A` : ''}`; }
     
-    function rerunValidation() {
-      showState2('upload');
-      document.getElementById('afterSampleFile').value = '';
-    }
+    function rerunValidation() { showState2('upload'); document.getElementById('afterSampleFile').value = ''; }
+    function downloadResults() { let r = `# Validation Results\n\n**${document.getElementById('afterSampleName').textContent}**\n**${document.getElementById('afterSampleMeta').textContent}**\n\n| ID | Assertion | Result | Finding |\n|----|-----------|--------|----------|\n`;
+      for (const item of validationResults.items) r += `| ${item.id} | ${item.assertion} | ${item.result.toUpperCase()} | ${item.finding} |\n`;
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([r], { type: 'text/markdown' })); a.download = 'validation-results.md'; a.click(); }
     
-    function downloadResults() {
-      // Create downloadable report
-      let report = `# Validation Results\n\n`;
-      report += `**After Sample:** ${document.getElementById('afterSampleName').textContent}\n`;
-      report += `**${document.getElementById('afterSampleMeta').textContent}**\n\n`;
-      report += `## Results\n\n`;
-      report += `| ID | Assertion | Result | Finding |\n`;
-      report += `|----|-----------|--------|----------|\n`;
-      
-      for (const item of validationResults.items) {
-        report += `| ${item.id} | ${item.assertion} | ${item.result.toUpperCase()} | ${item.finding} |\n`;
-      }
-      
-      const blob = new Blob([report], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'validation-results.md';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+    function showState1(state) { ['upload', 'processing', 'review', 'approved', 'error'].forEach(s => document.getElementById(`state1-${s}`).classList.toggle('hidden', s !== state)); }
+    function showState2(state) { ['locked', 'upload', 'processing', 'results', 'error'].forEach(s => document.getElementById(`state2-${s}`).classList.toggle('hidden', s !== state)); }
+    function resetPart1() { requirementsDocId = null; checklistDocId = null; checklistData = []; document.getElementById('requirementsFile').value = ''; showState1('upload'); lockPart2(); }
+    function resetPart2() { afterSampleDocId = null; validationResults = null; document.getElementById('afterSampleFile').value = ''; showState2('upload'); }
+    function resetAll() { resetPart1(); resetPart2(); }
     
-    // ============================================================
-    // UI STATE HELPERS
-    // ============================================================
-    function showState1(state) {
-      const states = ['upload', 'processing', 'review', 'approved', 'error'];
-      for (const s of states) {
-        document.getElementById(`state1-${s}`).classList.toggle('hidden', s !== state);
-      }
-    }
-    
-    function showState2(state) {
-      const states = ['locked', 'upload', 'processing', 'results', 'error'];
-      for (const s of states) {
-        document.getElementById(`state2-${s}`).classList.toggle('hidden', s !== state);
-      }
-    }
-    
-    function resetPart1() {
-      requirementsDocId = null;
-      checklistDocId = null;
-      checklistData = [];
-      document.getElementById('requirementsFile').value = '';
-      showState1('upload');
-      lockPart2();
-    }
-    
-    function resetPart2() {
-      afterSampleDocId = null;
-      validationResults = null;
-      document.getElementById('afterSampleFile').value = '';
-      showState2('upload');
-    }
-    
-    function resetAll() {
-      resetPart1();
-      resetPart2();
-    }
-    
-    // ============================================================
-    // INIT
-    // ============================================================
+    if (localStorage.getItem('osg_mode') === 'moonlit') document.documentElement.setAttribute('data-mode', 'moonlit');
     checkAuth();
   </script>
 
