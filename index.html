@@ -1064,7 +1064,6 @@
       try {
         afterSampleDocId = await uploadFile(file); document.getElementById('processing2Text').textContent = 'Starting validation...';
         startValidationSteps();
-        const jobCodeMatch = currentChecklistName?.match(/(US\d+|\d{4})/i); const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
         await runAgent(AGENT_CHECKLIST_VALIDATION, { after_sample: afterSampleDocId, checklist_id: checklistDocId });
         let validationDoc = null, attempts = 0;
         // Keep polling until we find the validation document - no timeout
@@ -1074,24 +1073,14 @@
             const docs = await apiCall('/objects?limit=100&offset=0'); 
             const docList = Array.isArray(docs) ? docs : docs?.objects || [];
             const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
-            // More flexible matching - look for "validation" in name
+            // Simple matching - just find recent doc with "validation" in name
             validationDoc = docList.find(d => {
               const created = new Date(d.created_at).getTime();
-              const nameMatch = d.name?.toLowerCase().includes('validation');
               const isRecent = created > fifteenMinAgo;
-              const hasJobCode = !jobCode || d.name?.includes(jobCode);
-              return isRecent && nameMatch && hasJobCode;
+              const isValidation = d.name?.toLowerCase().includes('validation');
+              return isRecent && isValidation;
             });
-            // Also try matching by "QA" if validation not found
-            if (!validationDoc) {
-              validationDoc = docList.find(d => {
-                const created = new Date(d.created_at).getTime();
-                const nameMatch = d.name?.toLowerCase().includes('qa') && d.name?.toLowerCase().includes('report');
-                const isRecent = created > fifteenMinAgo;
-                return isRecent && nameMatch;
-              });
-            }
-            console.log(`Poll ${attempts}: Found ${docList.length} docs, validation doc:`, validationDoc?.name);
+            console.log(`Poll ${attempts}: checking ${docList.length} docs, found:`, validationDoc?.name || 'none');
           } catch (e) { console.log('Poll error:', e); }
         }
         document.getElementById('processing2Text').textContent = 'Loading results...';
