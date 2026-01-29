@@ -988,13 +988,31 @@
       try {
         requirementsDocId = await uploadFile(file); document.getElementById('processing1Text').textContent = 'Starting extraction...';
         await runAgent(AGENT_CHECKLIST_GENERATION, { task: requirementsDocId });
-        const jobCodeMatch = file.name.match(/\(([^)]+)\)/); const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
+        // Extract job codes - try multiple patterns
+        const jobCodeMatch = file.name.match(/\(([^)]+)\)/); 
+        const jobNumMatch = file.name.match(/#?(\d{4})/);
+        const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
+        const jobNum = jobNumMatch ? jobNumMatch[1] : null;
+        
         let checklistDoc = null, attempts = 0;
         while (!checklistDoc) {
           await sleep(3000); attempts++; document.getElementById('processing1Text').textContent = `Waiting for checklist... (${attempts * 3}s)`;
-          try { const docs = await apiCall('/objects?limit=50&offset=0'); const docList = Array.isArray(docs) ? docs : docs?.objects || [];
+          try { 
+            const docs = await apiCall('/objects?limit=50&offset=0'); 
+            const docList = Array.isArray(docs) ? docs : docs?.objects || [];
             const tenMinAgo = Date.now() - 10 * 60 * 1000;
-            checklistDoc = docList.find(d => new Date(d.created_at).getTime() > tenMinAgo && d.name?.toLowerCase().includes('checklist') && !d.name?.toLowerCase().includes('validation') && (jobCode ? d.name?.includes(jobCode) : true));
+            // More flexible matching - look for "checklist" and either job code OR job number
+            checklistDoc = docList.find(d => {
+              const created = new Date(d.created_at).getTime();
+              const isRecent = created > tenMinAgo;
+              const isChecklist = d.name?.toLowerCase().includes('checklist') && !d.name?.toLowerCase().includes('validation');
+              const matchesJob = !jobCode && !jobNum ? true : 
+                (jobCode && d.name?.includes(jobCode)) || 
+                (jobNum && d.name?.includes(jobNum)) ||
+                (jobNum && d.name?.includes(`#${jobNum}`));
+              return isRecent && isChecklist && matchesJob;
+            });
+            console.log(`Checklist poll ${attempts}: Found ${docList.length} docs, match:`, checklistDoc?.name);
           } catch (e) { console.log('Poll error:', e); }
         }
         checklistDocId = checklistDoc.id; currentChecklistName = checklistDoc.name;
