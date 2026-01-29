@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OSG QA Validation</title>
+  <title>OSG QA Demo</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500&display=swap');
     
@@ -75,9 +75,10 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
-      line-height: 1.6;
+      line-height: 1.5;
       letter-spacing: 0.01em;
       transition: background-color 0.5s ease, color 0.5s ease;
+      font-size: 13px;
     }
     
     body::before {
@@ -94,37 +95,37 @@
       background: var(--surface);
       background-image: var(--surface-glow);
       border-bottom: 1px solid var(--border);
-      padding: 20px 32px;
+      padding: 14px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       transition: all 0.5s ease;
     }
     
-    .logo-section { display: flex; align-items: center; gap: 14px; }
+    .logo-section { display: flex; align-items: center; gap: 12px; }
     
     .logo {
-      width: 40px; height: 40px;
+      width: 32px; height: 32px;
       background: var(--text);
-      border-radius: 10px;
+      border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       color: var(--bg);
-      font-weight: 700; font-size: 12px;
+      font-weight: 700; font-size: 10px;
     }
     
     .brand-name {
       font-family: 'IBM Plex Serif', Georgia, serif;
-      font-size: 17px; font-weight: 500;
+      font-size: 15px; font-weight: 500;
     }
     
-    .brand-sub { font-size: 12px; color: var(--text-3); }
+    .brand-sub { font-size: 11px; color: var(--text-3); }
     
-    .header-actions { display: flex; align-items: center; gap: 14px; }
+    .header-actions { display: flex; align-items: center; gap: 10px; }
     
-    .status-badge { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
+    .status-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2); }
     
     .status-dot {
-      width: 8px; height: 8px; border-radius: 50%;
+      width: 6px; height: 6px; border-radius: 50%;
       background: var(--pass);
       animation: breathe 3s ease-in-out infinite;
     }
@@ -138,25 +139,25 @@
     
     .btn-header {
       background: var(--surface); border: 1px solid var(--border);
-      color: var(--text-2); padding: 10px 14px; border-radius: 8px;
-      font-family: inherit; font-size: 12px; cursor: pointer;
-      display: flex; align-items: center; gap: 6px;
+      color: var(--text-2); padding: 6px 10px; border-radius: 6px;
+      font-family: inherit; font-size: 11px; cursor: pointer;
+      display: flex; align-items: center; gap: 5px;
       transition: all 0.25s ease;
     }
     
     .btn-header:hover { border-color: var(--text-3); color: var(--text); }
     
-    .main-container { max-width: 1300px; margin: 0 auto; padding: 32px; }
+    .main-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
     
-    .workflow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .workflow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     
     .workflow-panel {
       background: var(--surface);
       background-image: var(--surface-glow);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 12px;
       overflow: hidden;
-      min-height: 580px;
+      min-height: 600px;
       display: flex; flex-direction: column;
       box-shadow: var(--card-shadow);
       transition: all 0.5s ease;
@@ -165,156 +166,167 @@
     .workflow-panel.locked { opacity: 0.5; pointer-events: none; }
     
     .panel-header {
-      padding: 20px 24px;
+      padding: 12px 16px;
       border-bottom: 1px solid var(--border-soft);
       display: flex; align-items: center; justify-content: space-between;
     }
     
     .panel-title {
       font-family: 'IBM Plex Serif', Georgia, serif;
-      font-size: 16px; font-weight: 500;
-      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; font-weight: 500;
+      display: flex; align-items: center; gap: 10px;
     }
     
     .step-number {
       background: var(--accent); color: white;
-      width: 26px; height: 26px; border-radius: 50%;
+      width: 22px; height: 22px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       font-family: 'IBM Plex Sans', sans-serif;
-      font-size: 12px; font-weight: 600;
+      font-size: 11px; font-weight: 600;
     }
     
     .workflow-panel.locked .step-number { background: var(--text-3); }
     
-    .lock-icon { color: var(--text-3); font-size: 11px; display: flex; align-items: center; gap: 6px; }
+    .lock-icon { color: var(--text-3); font-size: 10px; display: flex; align-items: center; gap: 5px; }
     
-    .panel-body { padding: 24px; flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+    .panel-body { padding: 16px; flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
     
     .upload-zone {
       border: 1.5px dashed var(--border);
-      border-radius: 14px;
-      padding: 44px 28px;
+      border-radius: 10px;
+      padding: 28px 20px;
       text-align: center;
       cursor: pointer;
       transition: all 0.3s ease;
       background: linear-gradient(180deg, var(--bg) 0%, rgba(0,0,0,0.01) 100%);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
     }
     
     .upload-zone:hover { border-color: var(--accent); background: var(--accent-soft); }
-    .upload-zone svg { color: var(--text-3); margin-bottom: 14px; opacity: 0.7; }
-    .upload-zone p { font-size: 14px; color: var(--text); margin-bottom: 6px; }
-    .upload-zone small { font-size: 12px; color: var(--text-3); }
+    .upload-zone svg { color: var(--text-3); margin-bottom: 10px; opacity: 0.7; }
+    .upload-zone p { font-size: 13px; color: var(--text); margin-bottom: 4px; }
+    .upload-zone small { font-size: 11px; color: var(--text-3); }
     .upload-zone input[type="file"] { display: none; }
     
     .processing-indicator {
-      display: flex; align-items: center; gap: 14px;
-      padding: 16px 18px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
       background: var(--accent-soft);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      margin-bottom: 20px;
+      border-radius: 8px;
+      margin-bottom: 12px;
     }
     
     .breath-dot {
-      width: 10px; height: 10px; border-radius: 50%;
+      width: 8px; height: 8px; border-radius: 50%;
       background: var(--accent);
       animation: breathe 2s ease-in-out infinite;
     }
     
-    .processing-indicator span { font-size: 13px; color: var(--text-2); }
+    .processing-indicator span { font-size: 12px; color: var(--text-2); }
     
     .success-indicator {
-      display: flex; align-items: center; gap: 12px;
-      padding: 14px 18px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
       background: var(--pass-soft);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      margin-bottom: 20px;
+      border-radius: 8px;
+      margin-bottom: 12px;
       color: var(--pass);
-      font-size: 13px; font-weight: 500;
+      font-size: 12px; font-weight: 500;
     }
     
     .error-indicator {
-      display: flex; align-items: center; gap: 12px;
-      padding: 14px 18px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px;
       background: var(--fail-soft);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      margin-bottom: 20px;
+      border-radius: 8px;
+      margin-bottom: 12px;
       color: var(--fail);
-      font-size: 13px; font-weight: 500;
+      font-size: 12px; font-weight: 500;
     }
     
+    /* COMPACT CHECKLIST STYLES */
     .checklist-container {
       border: 1px solid var(--border);
-      border-radius: 14px;
+      border-radius: 10px;
       overflow: hidden;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       flex: 1;
       display: flex; flex-direction: column;
       background: var(--surface);
     }
     
     .checklist-header {
-      padding: 14px 18px;
+      padding: 8px 12px;
       background: var(--bg);
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
     }
     
-    .checklist-title { font-size: 13px; font-weight: 600; }
-    .checklist-count { font-size: 12px; color: var(--text-3); }
+    .checklist-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+    .checklist-count { font-size: 11px; color: var(--text-3); }
     
-    .checklist-body { flex: 1; overflow-y: auto; max-height: 360px; }
+    .checklist-body { flex: 1; overflow-y: auto; max-height: 480px; }
     
     .category-header {
-      padding: 10px 18px;
+      padding: 6px 12px;
       background: var(--text);
       color: var(--bg);
-      font-size: 11px; font-weight: 600;
+      font-size: 10px; font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     
     .checklist-item {
-      display: flex; align-items: flex-start; gap: 14px;
-      padding: 14px 18px;
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 12px;
       border-bottom: 1px solid var(--border-soft);
-      transition: background 0.2s ease;
+      transition: background 0.15s ease;
+      font-size: 12px;
     }
     
     .checklist-item:hover { background: var(--bg); }
     .checklist-item.removed { background: var(--fail-soft); opacity: 0.6; }
     .checklist-item.removed .item-text { text-decoration: line-through; }
     
-    .item-checkbox input { width: 16px; height: 16px; margin-top: 3px; cursor: pointer; accent-color: var(--accent); }
-    .item-content { flex: 1; }
-    .item-id { font-size: 10px; color: var(--text-3); margin-bottom: 3px; }
-    .item-text { font-size: 13px; color: var(--text); margin-bottom: 5px; }
-    .item-meta { font-size: 11px; color: var(--text-3); }
+    .item-checkbox input { width: 14px; height: 14px; margin-top: 1px; cursor: pointer; accent-color: var(--accent); }
+    .item-content { flex: 1; min-width: 0; }
+    .item-id { font-size: 9px; color: var(--text-3); display: inline; margin-right: 6px; }
+    .item-text { font-size: 12px; color: var(--text); display: inline; }
+    .item-meta { font-size: 10px; color: var(--text-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .item-expected { color: var(--accent); }
+    
+    /* Compact mode: single line per item */
+    .checklist-item.compact {
+      padding: 4px 12px;
+      align-items: center;
+    }
+    .checklist-item.compact .item-meta { display: none; }
     
     .action-bar {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 16px 18px;
+      padding: 10px 12px;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 8px;
       margin-top: auto;
     }
     
-    .action-info { font-size: 12px; color: var(--text-3); }
+    .action-info { font-size: 11px; color: var(--text-3); }
     .action-info strong { color: var(--text); }
     
     .btn {
-      padding: 12px 20px;
-      border-radius: 10px;
+      padding: 8px 14px;
+      border-radius: 6px;
       font-family: inherit;
-      font-size: 13px; font-weight: 500;
+      font-size: 11px; font-weight: 500;
       cursor: pointer;
       border: 1px solid transparent;
-      display: flex; align-items: center; gap: 8px;
+      display: flex; align-items: center; gap: 6px;
       transition: all 0.25s ease;
     }
     
@@ -326,42 +338,56 @@
     .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
     .btn-secondary:hover:not(:disabled) { border-color: var(--text-3); }
     
-    .results-container { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: var(--surface); }
+    /* COMPACT RESULTS STYLES */
+    .results-container { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: var(--surface); }
     
     .results-header {
-      padding: 16px 18px;
+      padding: 10px 12px;
       background: var(--text);
       color: var(--bg);
       display: flex; align-items: center; justify-content: space-between;
     }
     
-    .results-title { font-family: 'IBM Plex Serif', Georgia, serif; font-size: 14px; font-weight: 500; }
+    .results-title { font-family: 'IBM Plex Serif', Georgia, serif; font-size: 12px; font-weight: 500; }
     
     .results-actions button {
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.2);
       color: white;
-      padding: 8px 14px; border-radius: 6px;
-      font-family: inherit; font-size: 11px;
-      cursor: pointer; margin-left: 8px;
+      padding: 4px 10px; border-radius: 4px;
+      font-family: inherit; font-size: 10px;
+      cursor: pointer; margin-left: 6px;
       transition: all 0.2s ease;
     }
     
     .results-actions button:hover { background: rgba(255,255,255,0.2); }
     
-    .results-body { max-height: 320px; overflow-y: auto; }
+    .results-summary-bar {
+      display: flex; gap: 12px; padding: 8px 12px;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      font-size: 11px;
+    }
+    
+    .results-summary-bar .stat { display: flex; align-items: center; gap: 4px; }
+    .results-summary-bar .stat.pass { color: var(--pass); }
+    .results-summary-bar .stat.fail { color: var(--fail); }
+    .results-summary-bar .stat.gap { color: var(--gap); }
+    .results-summary-bar .stat.na { color: var(--text-3); }
+    
+    .results-body { max-height: 380px; overflow-y: auto; }
     
     .result-item {
-      display: flex; align-items: flex-start; gap: 14px;
-      padding: 14px 18px;
+      display: flex; align-items: flex-start; gap: 8px;
+      padding: 6px 12px;
       border-bottom: 1px solid var(--border-soft);
+      font-size: 12px;
     }
     
     .result-status {
-      width: 24px; height: 24px; border-radius: 50%;
+      width: 18px; height: 18px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);
+      margin-top: 1px;
     }
     
     .result-status.pass { background: var(--pass-soft); color: var(--pass); }
@@ -369,32 +395,113 @@
     .result-status.gap { background: var(--gap-soft); color: var(--gap); }
     .result-status.na { background: var(--gap-soft); color: var(--text-3); }
     
-    .result-id { font-size: 10px; color: var(--text-3); margin-bottom: 3px; }
-    .result-text { font-size: 13px; flex: 1; color: var(--text); }
-    .result-finding { font-size: 12px; color: var(--text-2); margin-top: 6px; padding: 8px 12px; background: var(--bg); border-radius: 6px; }
+    .result-content { flex: 1; min-width: 0; }
+    .result-id { font-size: 9px; color: var(--text-3); display: inline; margin-right: 6px; }
+    .result-text { font-size: 12px; color: var(--text); display: inline; }
+    .result-finding { font-size: 10px; color: var(--text-2); margin-top: 3px; padding: 4px 8px; background: var(--bg); border-radius: 4px; }
     
     .after-sample-info {
       background: var(--accent-soft);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin-bottom: 20px;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
     }
     
-    .after-sample-badge { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-    .after-sample-meta { font-size: 12px; color: var(--text-2); padding-left: 24px; }
+    .after-sample-badge { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 500; color: var(--text); }
+    .after-sample-meta { font-size: 11px; color: var(--text-2); margin-top: 4px; }
     
     .empty-state {
       flex: 1;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       text-align: center;
       color: var(--text-3);
-      padding: 48px;
+      padding: 32px;
     }
     
-    .empty-state svg { margin-bottom: 18px; opacity: 0.4; }
-    .empty-state p { font-size: 14px; margin-bottom: 6px; color: var(--text-2); }
-    .empty-state small { font-size: 12px; opacity: 0.7; }
+    .empty-state svg { margin-bottom: 12px; opacity: 0.4; }
+    .empty-state p { font-size: 13px; margin-bottom: 4px; color: var(--text-2); }
+    .empty-state small { font-size: 11px; opacity: 0.7; }
+    
+    /* Validation Activity Animation */
+    .validation-activity {
+      flex: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 32px;
+    }
+    
+    .activity-icon {
+      position: relative;
+      width: 56px; height: 56px;
+      margin-bottom: 20px;
+    }
+    
+    .activity-spinner {
+      position: absolute; inset: 0;
+      color: var(--accent);
+      animation: spin 2s linear infinite;
+    }
+    
+    .activity-check {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--accent);
+      opacity: 0;
+      animation: pulse-check 10s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse-check {
+      0%, 90% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+      95% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+    }
+    
+    .activity-step {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 8px;
+      min-height: 20px;
+      transition: opacity 0.3s ease;
+    }
+    
+    .activity-step.fading { opacity: 0; }
+    
+    .activity-progress {
+      margin-bottom: 12px;
+    }
+    
+    .activity-dots {
+      display: flex; gap: 6px; justify-content: center;
+    }
+    
+    .activity-dots .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.3s ease;
+    }
+    
+    .activity-dots .dot.active {
+      background: var(--accent);
+      transform: scale(1.2);
+    }
+    
+    .activity-dots .dot.done {
+      background: var(--pass);
+    }
+    
+    .activity-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      min-height: 16px;
+    }
     
     .modal-overlay {
       position: fixed; inset: 0;
@@ -410,19 +517,19 @@
       background: var(--surface);
       background-image: var(--surface-glow);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      width: 380px; padding: 32px;
+      border-radius: 12px;
+      width: 340px; padding: 24px;
       box-shadow: 0 24px 80px rgba(0,0,0,0.15);
     }
     
-    .modal h2 { font-family: 'IBM Plex Serif', Georgia, serif; font-size: 20px; font-weight: 500; margin-bottom: 8px; }
-    .modal p { font-size: 13px; color: var(--text-3); margin-bottom: 24px; }
+    .modal h2 { font-family: 'IBM Plex Serif', Georgia, serif; font-size: 18px; font-weight: 500; margin-bottom: 6px; }
+    .modal p { font-size: 12px; color: var(--text-3); margin-bottom: 18px; }
     
     .modal input {
-      width: 100%; padding: 14px 16px;
-      border: 1px solid var(--border); border-radius: 10px;
-      font-family: inherit; font-size: 14px;
-      margin-bottom: 14px;
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: 13px;
+      margin-bottom: 10px;
       background: var(--bg); color: var(--text);
       transition: all 0.2s ease;
     }
@@ -430,27 +537,27 @@
     .modal input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
     
     .modal button {
-      width: 100%; padding: 14px;
+      width: 100%; padding: 10px;
       background: var(--text); color: var(--bg);
-      border: none; border-radius: 10px;
-      font-family: inherit; font-size: 14px; font-weight: 500;
+      border: none; border-radius: 8px;
+      font-family: inherit; font-size: 13px; font-weight: 500;
       cursor: pointer;
       transition: all 0.25s ease;
     }
     
     .modal button:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
     .modal button:disabled { background: var(--text-3); cursor: not-allowed; transform: none; box-shadow: none; }
-    .modal .error { color: var(--fail); font-size: 12px; margin-top: 12px; text-align: center; }
+    .modal .error { color: var(--fail); font-size: 11px; margin-top: 10px; text-align: center; }
     
-    .source-selector { display: flex; gap: 12px; margin-bottom: 12px; }
+    .source-selector { display: flex; gap: 8px; margin-bottom: 10px; }
     .source-option { flex: 1; cursor: pointer; }
     .source-option input { display: none; }
     
     .source-label {
-      display: flex; align-items: center; gap: 10px;
-      padding: 14px 16px;
-      border: 1px solid var(--border); border-radius: 10px;
-      font-size: 13px; color: var(--text-2);
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-size: 12px; color: var(--text-2);
       transition: all 0.25s ease;
       background: var(--surface);
     }
@@ -458,41 +565,41 @@
     .source-option input:checked + .source-label { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
     .source-label:hover { border-color: var(--text-3); }
     
-    .input-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+    .input-label { display: block; font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
     
     .checklist-dropdown {
-      width: 100%; padding: 14px 16px;
-      border: 1px solid var(--border); border-radius: 10px;
-      font-family: inherit; font-size: 14px;
+      width: 100%; padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: inherit; font-size: 12px;
       color: var(--text); background: var(--surface);
       cursor: pointer; transition: all 0.2s ease;
     }
     
     .checklist-dropdown:focus { outline: none; border-color: var(--accent); }
     
-    .background-docs { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-    .background-docs-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--text-2); }
-    .background-docs-header span:first-of-type { font-size: 12px; font-weight: 600; color: var(--text); }
-    .background-docs-note { font-size: 11px; color: var(--text-3); font-style: italic; }
-    .background-docs-list { display: flex; flex-direction: column; gap: 14px; }
-    .background-doc-group { padding-left: 24px; }
-    .background-doc-group-title { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px; }
-    .background-doc-item { font-size: 12px; color: var(--text-2); padding: 3px 0; }
+    .background-docs { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-size: 11px; }
+    .background-docs-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; color: var(--text-2); }
+    .background-docs-header span:first-of-type { font-size: 11px; font-weight: 600; color: var(--text); }
+    .background-docs-note { font-size: 10px; color: var(--text-3); font-style: italic; }
+    .background-docs-list { display: flex; flex-direction: column; gap: 8px; }
+    .background-doc-group { padding-left: 18px; }
+    .background-doc-group-title { font-size: 10px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 2px; }
+    .background-doc-item { font-size: 11px; color: var(--text-2); padding: 2px 0; }
     
     .approved-badge {
-      display: inline-flex; align-items: center; gap: 10px;
-      padding: 12px 18px;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
       background: var(--pass-soft);
       color: var(--pass);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      font-size: 13px; font-weight: 500;
-      margin-bottom: 20px;
+      border-radius: 8px;
+      font-size: 11px; font-weight: 500;
+      margin-bottom: 12px;
     }
     
     .mode-toggle {
-      position: fixed; bottom: 24px; right: 24px;
-      width: 44px; height: 44px; border-radius: 50%;
+      position: fixed; bottom: 20px; right: 20px;
+      width: 36px; height: 36px; border-radius: 50%;
       border: 1px solid var(--border);
       background: var(--surface);
       background-image: var(--surface-glow);
@@ -504,7 +611,7 @@
     }
     
     .mode-toggle:hover { border-color: var(--text-3); transform: scale(1.08); box-shadow: var(--card-shadow-hover); }
-    .mode-toggle svg { width: 18px; height: 18px; color: var(--text-3); transition: all 0.4s ease; }
+    .mode-toggle svg { width: 16px; height: 16px; color: var(--text-3); transition: all 0.4s ease; }
     .mode-toggle:hover svg { color: var(--text-2); }
     .mode-toggle .sun { display: none; }
     .mode-toggle .moon { display: block; }
@@ -512,13 +619,25 @@
     [data-mode="moonlit"] .mode-toggle .moon { display: none; }
     
     .hidden { display: none !important; }
+    
+    /* Filter tabs for results */
+    .filter-tabs {
+      display: flex; gap: 2px; padding: 6px 12px; background: var(--bg); border-bottom: 1px solid var(--border);
+    }
+    .filter-tab {
+      padding: 4px 10px; border-radius: 4px; font-size: 10px; cursor: pointer;
+      background: transparent; border: none; color: var(--text-3);
+      font-family: inherit; transition: all 0.2s;
+    }
+    .filter-tab:hover { color: var(--text); }
+    .filter-tab.active { background: var(--surface); color: var(--text); font-weight: 500; }
   </style>
 </head>
 <body>
 
   <div class="modal-overlay" id="loginModal">
     <div class="modal">
-      <h2>QA Validation</h2>
+      <h2>QA Demo</h2>
       <p>Enter password to continue</p>
       <input type="password" id="passwordInput" placeholder="Password" onkeypress="if(event.key==='Enter')login()">
       <button id="loginBtn" onclick="login()">Connect</button>
@@ -530,7 +649,7 @@
     <div class="logo-section">
       <div class="logo">OSG</div>
       <div class="brand-text">
-        <div class="brand-name">QA Validation</div>
+        <div class="brand-name">QA Demo</div>
         <div class="brand-sub">Requirements to Validation</div>
       </div>
     </div>
@@ -540,11 +659,11 @@
         <span id="connectionStatus">Disconnected</span>
       </div>
       <button class="btn-header" onclick="resetAll()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
         Reset
       </button>
       <button class="btn-header" onclick="logout()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Logout
       </button>
     </div>
@@ -563,26 +682,26 @@
             <div class="source-selector">
               <label class="source-option">
                 <input type="radio" name="checklistSource" value="existing" onchange="toggleChecklistSource('existing')">
-                <span class="source-label"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Use Existing</span>
+                <span class="source-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Existing</span>
               </label>
               <label class="source-option">
                 <input type="radio" name="checklistSource" value="new" checked onchange="toggleChecklistSource('new')">
-                <span class="source-label"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload New</span>
+                <span class="source-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Upload</span>
               </label>
             </div>
             
-            <div id="existingChecklistSection" class="hidden" style="margin-top: 20px;">
+            <div id="existingChecklistSection" class="hidden" style="margin-top: 14px;">
               <label class="input-label">Select Checklist</label>
               <select id="checklistDropdown" class="checklist-dropdown" onchange="handleChecklistSelect()">
                 <option value="">-- Select a checklist --</option>
               </select>
-              <button class="btn btn-primary" style="margin-top: 14px; width: 100%;" onclick="loadSelectedChecklist()" id="loadChecklistBtn" disabled>Load Checklist</button>
+              <button class="btn btn-primary" style="margin-top: 10px; width: 100%;" onclick="loadSelectedChecklist()" id="loadChecklistBtn" disabled>Load Checklist</button>
             </div>
             
-            <div id="newUploadSection" style="margin-top: 20px;">
+            <div id="newUploadSection" style="margin-top: 14px;">
               <div class="upload-zone" onclick="document.getElementById('requirementsFile').click()">
                 <input type="file" id="requirementsFile" accept=".pdf,.docx,.doc,.txt" onchange="handleRequirementsUpload(event)">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 <p>Drop requirements document</p>
                 <small>PDF, DOCX, TXT</small>
               </div>
@@ -591,23 +710,23 @@
           
           <div id="state1-processing" class="hidden">
             <div class="processing-indicator"><div class="breath-dot"></div><span id="processing1Text">Uploading...</span></div>
-            <div class="empty-state"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Analyzing requirements</p></div>
+            <div class="empty-state"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><p>Analyzing requirements</p></div>
           </div>
           
           <div id="state1-review" class="hidden">
-            <div class="success-indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="extractedFromText">Extracted from document</span></div>
+            <div class="success-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="extractedFromText">Extracted from document</span></div>
             <div class="checklist-container">
               <div class="checklist-header"><span class="checklist-title">Generated Checklist</span><span class="checklist-count"><span id="itemCount">0</span> items</span></div>
               <div class="checklist-body" id="checklistBody"></div>
             </div>
             <div class="action-bar">
-              <div class="action-info" id="changesSummary">Review and approve when ready</div>
-              <button class="btn btn-success" onclick="approveChecklist()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Approve</button>
+              <div class="action-info" id="changesSummary">Review and approve</div>
+              <button class="btn btn-success" onclick="approveChecklist()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Approve</button>
             </div>
           </div>
           
           <div id="state1-approved" class="hidden">
-            <div class="success-indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Approved — Ready for validation</span></div>
+            <div class="success-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>Approved — Ready for validation</span></div>
             <div class="checklist-container" style="opacity: 0.85;">
               <div class="checklist-header"><span class="checklist-title">Approved Checklist</span><span class="checklist-count" id="approvedItemCount">0 items</span></div>
               <div class="checklist-body" id="approvedChecklistBody"></div>
@@ -616,7 +735,7 @@
           </div>
           
           <div id="state1-error" class="hidden">
-            <div class="error-indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span id="error1Text">An error occurred</span></div>
+            <div class="error-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span id="error1Text">An error occurred</span></div>
             <button class="btn btn-secondary" onclick="resetPart1()">Try Again</button>
           </div>
           
@@ -626,51 +745,82 @@
       <div class="workflow-panel locked" id="panel2">
         <div class="panel-header">
           <div class="panel-title"><span class="step-number">2</span> Validation</div>
-          <div class="lock-icon" id="lockIcon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Approve checklist to unlock</div>
+          <div class="lock-icon" id="lockIcon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Approve to unlock</div>
         </div>
         <div class="panel-body">
           
           <div id="state2-locked">
-            <div class="empty-state"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><p>Validation Locked</p><small>Complete Part 1 to proceed</small></div>
+            <div class="empty-state"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><p>Validation Locked</p><small>Complete Part 1 to proceed</small></div>
           </div>
           
           <div id="state2-upload" class="hidden">
-            <div class="approved-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="approvedBadgeText">Checklist Approved</span></div>
-            <div class="upload-zone" onclick="document.getElementById('afterSampleFile').click()" style="margin-bottom: 24px;">
+            <div class="approved-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span id="approvedBadgeText">Checklist Approved</span></div>
+            <div class="upload-zone" onclick="document.getElementById('afterSampleFile').click()" style="margin-bottom: 16px;">
               <input type="file" id="afterSampleFile" accept=".pdf" onchange="handleAfterSampleUpload(event)">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
               <p>Drop After Sample PDF</p>
               <small>Document to validate</small>
             </div>
             <div class="background-docs">
-              <div class="background-docs-header"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Reference Collections</span><span class="background-docs-note">(auto-selected)</span></div>
+              <div class="background-docs-header"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg><span>Reference Collections</span><span class="background-docs-note">(auto)</span></div>
               <div class="background-docs-list">
-                <div class="background-doc-group"><div class="background-doc-group-title">Letter Templates</div><div class="background-doc-item">Bankruptcy Combo, Internal Combo, etc.</div></div>
-                <div class="background-doc-group"><div class="background-doc-group-title">Fee Schedules</div><div class="background-doc-item">State-specific fee schedules</div></div>
-                <div class="background-doc-group"><div class="background-doc-group-title">State Disclosures</div><div class="background-doc-item">State-specific verbiage</div></div>
+                <div class="background-doc-group"><div class="background-doc-group-title">Templates</div><div class="background-doc-item">Letter templates</div></div>
+                <div class="background-doc-group"><div class="background-doc-group-title">Disclosures</div><div class="background-doc-item">Fee schedules, state disclosures</div></div>
               </div>
             </div>
           </div>
           
           <div id="state2-processing" class="hidden">
             <div class="processing-indicator"><div class="breath-dot"></div><span id="processing2Text">Uploading...</span></div>
-            <div class="empty-state"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>Validating against checklist</p></div>
+            <div class="validation-activity">
+              <div class="activity-icon">
+                <svg class="activity-spinner" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10" stroke-dasharray="31.4" stroke-dashoffset="10"/>
+                </svg>
+                <svg class="activity-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              </div>
+              <p class="activity-step" id="activityStep">Analyzing document structure</p>
+              <div class="activity-progress">
+                <div class="activity-dots">
+                  <span class="dot active"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+              </div>
+              <p class="activity-sub" id="activitySub">Reading After Sample PDF...</p>
+            </div>
           </div>
           
           <div id="state2-results" class="hidden">
             <div class="after-sample-info">
-              <div class="after-sample-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span id="afterSampleName">After Sample</span></div>
+              <div class="after-sample-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg><span id="afterSampleName">After Sample</span></div>
               <div class="after-sample-meta" id="afterSampleMeta">Validated</div>
             </div>
             <div class="results-container">
-              <div class="results-header"><span class="results-title">Validation Results</span><div class="results-actions"><button onclick="downloadResults()">Download</button><button onclick="rerunValidation()">Rerun</button></div></div>
+              <div class="results-header"><span class="results-title">Validation Results</span><div class="results-actions"><button onclick="downloadResults()">Export</button><button onclick="rerunValidation()">Rerun</button></div></div>
+              <div class="results-summary-bar">
+                <div class="stat pass"><strong id="passCount">0</strong> pass</div>
+                <div class="stat fail"><strong id="failCount">0</strong> fail</div>
+                <div class="stat gap"><strong id="gapCount">0</strong> gap</div>
+                <div class="stat na"><strong id="naCount">0</strong> n/a</div>
+              </div>
+              <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterResults('all')">All</button>
+                <button class="filter-tab" onclick="filterResults('pass')">Pass</button>
+                <button class="filter-tab" onclick="filterResults('fail')">Fail</button>
+                <button class="filter-tab" onclick="filterResults('gap')">Gap</button>
+                <button class="filter-tab" onclick="filterResults('na')">N/A</button>
+              </div>
               <div class="results-body" id="resultsBody"></div>
             </div>
-            <div class="action-bar" style="margin-top:20px;"><div class="action-info" id="resultsSummary">Loading...</div><button class="btn btn-primary" onclick="downloadResults()">Download Report</button></div>
           </div>
           
           <div id="state2-error" class="hidden">
-            <div class="error-indicator"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span id="error2Text">An error occurred</span></div>
+            <div class="error-indicator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg><span id="error2Text">An error occurred</span></div>
             <button class="btn btn-secondary" onclick="resetPart2()">Try Again</button>
           </div>
           
@@ -696,7 +846,64 @@
     const MODEL = 'publishers/anthropic/models/claude-opus-4-5';
     
     let jwt = null, requirementsDocId = null, checklistDocId = null, afterSampleDocId = null;
-    let checklistData = [], validationResults = null, currentChecklistName = '';
+    let checklistData = [], validationResults = null, currentChecklistName = '', currentFilter = 'all';
+    let validationStepInterval = null;
+    
+    const VALIDATION_STEPS = [
+      { step: 'Analyzing document structure', sub: 'Reading After Sample PDF...' },
+      { step: 'Extracting consumer data', sub: 'Loan number, name, address...' },
+      { step: 'Verifying client data', sub: 'Matching against spreadsheet...' },
+      { step: 'Checking branding elements', sub: 'Logo placement, return address...' },
+      { step: 'Validating document flow', sub: 'Page sequence, templates...' },
+      { step: 'Reviewing state disclosures', sub: 'Checking required verbiage...' },
+      { step: 'Verifying fee schedule', sub: 'State-specific requirements...' },
+      { step: 'Checking data integrity', sub: 'Loan truncation, leading zeros...' },
+      { step: 'Validating formatting rules', sub: 'Paragraph splits, date formatting...' },
+      { step: 'Generating QA report', sub: 'Compiling findings...' }
+    ];
+    
+    function startValidationSteps() {
+      let stepIndex = 0;
+      const stepEl = document.getElementById('activityStep');
+      const subEl = document.getElementById('activitySub');
+      const dots = document.querySelectorAll('.activity-dots .dot');
+      
+      function updateStep() {
+        // Fade out
+        stepEl.classList.add('fading');
+        
+        setTimeout(() => {
+          // Update content
+          const step = VALIDATION_STEPS[stepIndex];
+          stepEl.textContent = step.step;
+          subEl.textContent = step.sub;
+          
+          // Update dots
+          dots.forEach((dot, i) => {
+            dot.classList.remove('active', 'done');
+            const dotStep = Math.floor(i * VALIDATION_STEPS.length / dots.length);
+            if (stepIndex > dotStep) dot.classList.add('done');
+            else if (Math.floor(stepIndex * dots.length / VALIDATION_STEPS.length) === i) dot.classList.add('active');
+          });
+          
+          // Fade in
+          stepEl.classList.remove('fading');
+          
+          // Next step
+          stepIndex = (stepIndex + 1) % VALIDATION_STEPS.length;
+        }, 300);
+      }
+      
+      updateStep();
+      validationStepInterval = setInterval(updateStep, 8000);
+    }
+    
+    function stopValidationSteps() {
+      if (validationStepInterval) {
+        clearInterval(validationStepInterval);
+        validationStepInterval = null;
+      }
+    }
     
     function toggleMode() {
       const html = document.documentElement;
@@ -784,11 +991,11 @@
         const jobCodeMatch = file.name.match(/\(([^)]+)\)/); const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
         let checklistDoc = null, attempts = 0;
         while (!checklistDoc) {
-          await sleep(2000); attempts++; document.getElementById('processing1Text').textContent = `Waiting for checklist... (${attempts * 2}s)`;
-          try { const docs = await apiCall('/objects?limit=30&offset=0'); const docList = Array.isArray(docs) ? docs : docs?.objects || [];
-            const fiveMinAgo = Date.now() - 5 * 60 * 1000;
-            checklistDoc = docList.find(d => new Date(d.created_at).getTime() > fiveMinAgo && d.name?.toLowerCase().includes('checklist') && (jobCode ? d.name?.includes(jobCode) : true));
-          } catch (e) {}
+          await sleep(3000); attempts++; document.getElementById('processing1Text').textContent = `Waiting for checklist... (${attempts * 3}s)`;
+          try { const docs = await apiCall('/objects?limit=50&offset=0'); const docList = Array.isArray(docs) ? docs : docs?.objects || [];
+            const tenMinAgo = Date.now() - 10 * 60 * 1000;
+            checklistDoc = docList.find(d => new Date(d.created_at).getTime() > tenMinAgo && d.name?.toLowerCase().includes('checklist') && !d.name?.toLowerCase().includes('validation') && (jobCode ? d.name?.includes(jobCode) : true));
+          } catch (e) { console.log('Poll error:', e); }
         }
         checklistDocId = checklistDoc.id; currentChecklistName = checklistDoc.name;
         document.getElementById('processing1Text').textContent = 'Loading content...';
@@ -812,12 +1019,12 @@
       const container = document.getElementById(containerId); container.innerHTML = ''; let currentCategory = null;
       for (const item of items) { if (item.category !== currentCategory) { currentCategory = item.category; const h = document.createElement('div'); h.className = 'category-header'; h.textContent = currentCategory; container.appendChild(h); }
         const el = document.createElement('div'); el.className = 'checklist-item' + (item.checked ? '' : ' removed');
-        el.innerHTML = `<div class="item-checkbox"><input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem(${item.id})"></div><div class="item-content"><div class="item-id">ID: ${item.id}</div><div class="item-text">${item.assertion}</div><div class="item-meta">Expected: <span class="item-expected">${item.expected}</span> · ${item.appliesTo}</div></div>`;
+        el.innerHTML = `<div class="item-checkbox"><input type="checkbox" ${item.checked ? 'checked' : ''} onchange="toggleItem('${item.id}')"></div><div class="item-content"><span class="item-id">${item.id}</span><span class="item-text">${item.assertion}</span><div class="item-meta"><span class="item-expected">${item.expected}</span> · ${item.appliesTo}</div></div>`;
         container.appendChild(el); }
     }
     
     function toggleItem(id) { const item = checklistData.find(i => i.id == id); if (item) { item.checked = !item.checked; renderChecklist(checklistData, 'checklistBody'); updateChangesSummary(); } }
-    function updateChangesSummary() { const removed = checklistData.filter(i => !i.checked).length; document.getElementById('changesSummary').innerHTML = removed > 0 ? `<strong>${removed} removed</strong>` : 'Review and approve when ready'; }
+    function updateChangesSummary() { const removed = checklistData.filter(i => !i.checked).length; document.getElementById('changesSummary').innerHTML = removed > 0 ? `<strong>${removed} removed</strong>` : 'Review and approve'; }
     
     function approveChecklist() { const approved = checklistData.filter(i => i.checked); renderChecklistReadOnly(approved, 'approvedChecklistBody'); document.getElementById('approvedItemCount').textContent = `${approved.length} items`; document.getElementById('approvedBadgeText').textContent = `Approved (${approved.length} items)`; showState1('approved'); unlockPart2(); }
     
@@ -825,7 +1032,7 @@
       const container = document.getElementById(containerId); container.innerHTML = ''; let currentCategory = null;
       for (const item of items) { if (item.category !== currentCategory) { currentCategory = item.category; const h = document.createElement('div'); h.className = 'category-header'; h.textContent = currentCategory; container.appendChild(h); }
         const el = document.createElement('div'); el.className = 'checklist-item'; el.style.pointerEvents = 'none';
-        el.innerHTML = `<div class="item-content"><div class="item-id">ID: ${item.id}</div><div class="item-text">${item.assertion}</div><div class="item-meta">Expected: <span class="item-expected">${item.expected}</span> · ${item.appliesTo}</div></div>`;
+        el.innerHTML = `<div class="item-content"><span class="item-id">${item.id}</span><span class="item-text">${item.assertion}</span><div class="item-meta"><span class="item-expected">${item.expected}</span> · ${item.appliesTo}</div></div>`;
         container.appendChild(el); }
     }
     
@@ -838,32 +1045,61 @@
       showState2('processing'); document.getElementById('processing2Text').textContent = 'Uploading...';
       try {
         afterSampleDocId = await uploadFile(file); document.getElementById('processing2Text').textContent = 'Starting validation...';
-        const jobCodeMatch = currentChecklistName?.match(/(US\d+)/i); const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
+        startValidationSteps();
+        const jobCodeMatch = currentChecklistName?.match(/(US\d+|\d{4})/i); const jobCode = jobCodeMatch ? jobCodeMatch[1] : null;
         await runAgent(AGENT_CHECKLIST_VALIDATION, { after_sample: afterSampleDocId, checklist_id: checklistDocId });
         let validationDoc = null, attempts = 0;
+        // Keep polling until we find the validation document - no timeout
         while (!validationDoc) {
-          await sleep(2000); attempts++; document.getElementById('processing2Text').textContent = `Validating... (${attempts * 2}s)`;
-          try { const docs = await apiCall('/objects?limit=50&offset=0'); const docList = Array.isArray(docs) ? docs : docs?.objects || [];
-            const fiveMinAgo = Date.now() - 5 * 60 * 1000;
-            validationDoc = docList.find(d => new Date(d.created_at).getTime() > fiveMinAgo && d.name?.toLowerCase().includes('validation') && (jobCode ? d.name?.includes(jobCode) : true));
-          } catch (e) {}
+          await sleep(3000); attempts++; document.getElementById('processing2Text').textContent = `Validating... (${attempts * 3}s)`;
+          try { 
+            const docs = await apiCall('/objects?limit=100&offset=0'); 
+            const docList = Array.isArray(docs) ? docs : docs?.objects || [];
+            const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
+            // More flexible matching - look for "validation" in name
+            validationDoc = docList.find(d => {
+              const created = new Date(d.created_at).getTime();
+              const nameMatch = d.name?.toLowerCase().includes('validation');
+              const isRecent = created > fifteenMinAgo;
+              const hasJobCode = !jobCode || d.name?.includes(jobCode);
+              return isRecent && nameMatch && hasJobCode;
+            });
+            // Also try matching by "QA" if validation not found
+            if (!validationDoc) {
+              validationDoc = docList.find(d => {
+                const created = new Date(d.created_at).getTime();
+                const nameMatch = d.name?.toLowerCase().includes('qa') && d.name?.toLowerCase().includes('report');
+                const isRecent = created > fifteenMinAgo;
+                return isRecent && nameMatch;
+              });
+            }
+            console.log(`Poll ${attempts}: Found ${docList.length} docs, validation doc:`, validationDoc?.name);
+          } catch (e) { console.log('Poll error:', e); }
         }
         document.getElementById('processing2Text').textContent = 'Loading results...';
-        const content = await fetchDocumentContent(validationDoc.content?.source); validationResults = parseValidationResults(content);
+        const content = await fetchDocumentContent(validationDoc.content?.source); 
+        validationResults = parseValidationResults(content);
         const nameParts = validationDoc.name?.split(' - ') || [];
-        document.getElementById('afterSampleName').textContent = `${validationResults.clientName !== 'Unknown' ? validationResults.clientName : (nameParts[2] || 'Unknown')} - ${validationResults.loanNumber !== 'Unknown' ? validationResults.loanNumber : (nameParts[3] || 'Unknown')}`;
-        document.getElementById('afterSampleMeta').textContent = `State: ${validationResults.state || 'Unknown'} | Type: ${validationResults.type || 'Unknown'}`;
-        renderResults(validationResults.items); updateResultsSummary(validationResults.items); showState2('results');
-      } catch (e) { document.getElementById('error2Text').textContent = e.message; showState2('error'); }
+        document.getElementById('afterSampleName').textContent = validationResults.consumerName !== 'Unknown' ? `${validationResults.consumerName} - ${validationResults.loanNumber}` : (nameParts.slice(2).join(' - ') || 'Unknown');
+        document.getElementById('afterSampleMeta').textContent = `State: ${validationResults.state || 'Unknown'} | Type: ${validationResults.type || 'Unknown'} | Client: ${validationResults.clientName || 'Unknown'}`;
+        renderResults(validationResults.items); updateResultsSummary(validationResults.items); stopValidationSteps(); showState2('results');
+      } catch (e) { stopValidationSteps(); document.getElementById('error2Text').textContent = e.message; showState2('error'); }
     }
     
     function parseValidationResults(content) {
-      const results = { state: 'Unknown', type: 'Unknown', clientName: 'Unknown', loanNumber: 'Unknown', items: [] };
+      const results = { state: 'Unknown', type: 'Unknown', clientName: 'Unknown', consumerName: 'Unknown', loanNumber: 'Unknown', items: [] };
       const lines = (typeof content === 'string' ? content : JSON.stringify(content)).split('\n');
       for (const line of lines) {
         if (line.includes('|') && !line.includes('---')) { const cells = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c);
-          if (cells.length === 2) { const f = cells[0].toLowerCase(); if (f === 'state') results.state = cells[1]; if (f === 'letter type' || f === 'type') results.type = cells[1]; if (f === 'borrower' || f === 'client' || f === 'client name') results.clientName = cells[1]; if (f === 'loan number' || f === 'loan/account') { const m = cells[1].match(/(\d{5,})/); if (m) results.loanNumber = m[1]; } } }
-        if (line.match(/\*?\*?State\*?\*?:/i) && !line.includes('|')) { const m = line.match(/([A-Z]{2})\b/); if (m) results.state = m[1]; }
+          if (cells.length === 2) { 
+            const f = cells[0].toLowerCase(); 
+            if (f === 'state' || f.includes('state')) { const m = cells[1].match(/([A-Z]{2})/); if (m) results.state = m[1]; }
+            if (f === 'letter type' || f === 'type') results.type = cells[1]; 
+            if (f === 'client') results.clientName = cells[1];
+            if (f === 'consumer') results.consumerName = cells[1];
+            if (f === 'loan number' || f === 'loan') { const m = cells[1].match(/(\d{5,})/); if (m) results.loanNumber = m[1]; } 
+          } 
+        }
         if (line.includes('|--') || line.includes('|-') || line.match(/\|\s*ID\s*\|/i)) continue;
         if (line.startsWith('|') && line.includes('|')) { const cells = line.split('|').map(c => c.replace(/\*\*/g, '').trim()).filter(c => c);
           if (cells.length >= 4) { let ri = -1, fi = -1;
@@ -873,16 +1109,32 @@
       return results.items.length ? results : { ...results, items: [{ id: '-', assertion: 'Parsing error or in progress', result: 'gap', finding: 'Check Vertesia' }] };
     }
     
-    function renderResults(items) {
+    function renderResults(items, filter = 'all') {
       const container = document.getElementById('resultsBody'); container.innerHTML = '';
-      for (const item of items) { const el = document.createElement('div'); el.className = 'result-item';
+      const filtered = filter === 'all' ? items : items.filter(i => i.result === filter);
+      for (const item of filtered) { const el = document.createElement('div'); el.className = 'result-item';
         let icon = item.result === 'pass' ? '<polyline points="20 6 9 17 4 12"/>' : item.result === 'fail' ? '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' : item.result === 'na' ? '<line x1="5" y1="12" x2="19" y2="12"/>' : '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
-        el.innerHTML = `<div class="result-status ${item.result}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${icon}</svg></div><div class="result-content"><div class="result-id">ID: ${item.id}</div><div class="result-text">${item.assertion}</div>${item.finding ? `<div class="result-finding">${item.finding}</div>` : ''}</div>`;
+        el.innerHTML = `<div class="result-status ${item.result}"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">${icon}</svg></div><div class="result-content"><span class="result-id">${item.id}</span><span class="result-text">${item.assertion}</span>${item.finding ? `<div class="result-finding">${item.finding}</div>` : ''}</div>`;
         container.appendChild(el); }
     }
     
-    function updateResultsSummary(items) { const p = items.filter(i => i.result === 'pass').length, f = items.filter(i => i.result === 'fail').length, g = items.filter(i => i.result === 'gap').length, n = items.filter(i => i.result === 'na').length;
-      document.getElementById('resultsSummary').innerHTML = `<strong>${p} passed</strong> · ${f} failed · ${g} gaps${n > 0 ? ` · ${n} N/A` : ''}`; }
+    function filterResults(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.filter-tab[onclick="filterResults('${filter}')"]`).classList.add('active');
+      renderResults(validationResults.items, filter);
+    }
+    
+    function updateResultsSummary(items) { 
+      const p = items.filter(i => i.result === 'pass').length;
+      const f = items.filter(i => i.result === 'fail').length;
+      const g = items.filter(i => i.result === 'gap').length;
+      const n = items.filter(i => i.result === 'na').length;
+      document.getElementById('passCount').textContent = p;
+      document.getElementById('failCount').textContent = f;
+      document.getElementById('gapCount').textContent = g;
+      document.getElementById('naCount').textContent = n;
+    }
     
     function rerunValidation() { showState2('upload'); document.getElementById('afterSampleFile').value = ''; }
     function downloadResults() { let r = `# Validation Results\n\n**${document.getElementById('afterSampleName').textContent}**\n**${document.getElementById('afterSampleMeta').textContent}**\n\n| ID | Assertion | Result | Finding |\n|----|-----------|--------|----------|\n`;
